@@ -32,12 +32,12 @@ The system uses a **delay array**: `{500 ms, 1000 ms, 2000 ms, 3000 ms}`. The LE
 
 ## Project Structure
 click1/
-├── Core/ # Source and header files
-├── Drivers/ # STM32 HAL drivers
-├── click1.ioc # CubeMX configuration file
-├── STM32F051R8TX_FLASH.ld # Linker script
-├── .gitignore # Git ignore file
-└── README.md # This file
+   -> Core/ # Source and header files
+   -> Drivers/ # STM32 HAL drivers
+   -> click1.ioc # CubeMX configuration file
+   -> STM32F051R8TX_FLASH.ld # Linker script
+   -> .gitignore # Git ignore file
+   -> README.md # This file
 
 - **Core/**: Contains `main.c` and peripheral initialization code  
 - **Drivers/**: HAL libraries required for the STM32F0  

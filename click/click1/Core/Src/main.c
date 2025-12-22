@@ -42,7 +42,17 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+uint32_t delays[] = {500, 1000, 2000, 3000};
+const uint8_t DELAY_COUNT = 4;
 
+int8_t idx = 0;
+int8_t dir = 1;
+
+uint32_t last_led_tick = 0;
+/* Button handling */
+uint8_t last_btn_state = 0;
+uint32_t last_btn_tick = 0;
+uint8_t click_count = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -94,6 +104,59 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  /*  LED BLINK LOGIC  */
+	  	  if (HAL_GetTick() - last_led_tick >= delays[idx])
+	  	    {
+	  	      last_led_tick = HAL_GetTick();
+	  	      HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
+
+	  	    /* AUTO move to next delay */
+	  	    idx += dir;
+
+	  	    if (idx >= DELAY_COUNT)
+	  	        idx = 0;
+	  	    else if (idx < 0)
+	  	        idx = DELAY_COUNT - 1;
+	  	    }
+	  	 /*  BUTTON LOGIC */
+	  	    uint8_t btn = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+
+	  	    /* Detect rising edge */
+	  	    if (btn && !last_btn_state)
+	  	    {
+	  	    	if (click_count < 2)          // Restrict maximum clicks to 2
+	  	    	        click_count++;
+
+	  	    	last_btn_tick = HAL_GetTick();
+
+	  	    }
+
+	  	    /* Process click after timeout */
+	  	    if (click_count > 0 &&
+	  	        HAL_GetTick() - last_btn_tick > 200)
+	  	    {
+
+	  	      if (click_count == 1)
+	  	      {
+	  	        /* Single click → next delay */
+	  	        idx += dir;
+
+	  	        if (idx >= DELAY_COUNT)
+	  	          idx = 0;
+	  	        else if (idx < 0)
+	  	        	 idx = DELAY_COUNT - 1;
+	  	        	      }
+	  	       else
+	  	       {
+	  	        	 /* Double click → reverse direction */
+	  	        	 dir = -dir;
+	  	        }
+
+	  	        	 click_count = 0;
+	  	        }
+
+	  	        last_btn_state = btn;
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

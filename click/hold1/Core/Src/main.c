@@ -132,7 +132,8 @@ int main(void)
 	  	    {
 	  	    	btn_press_tick = HAL_GetTick();
 	  	    	last_btn_tick  = btn_press_tick;
-	  	    	click_count++;
+	  	    	if (click_count < 2)           // Restrict clicks to max 2
+	  	    	        click_count++;
 	  	    }
 	  	  /*  Button Release Detection */
 	  	    if (!btn && last_btn_state)

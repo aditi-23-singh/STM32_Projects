@@ -26,9 +26,9 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-#define HOLD_THRESHOLD_MS   400    // Press longer than this = hold
+#define HOLD_THRESHOLD_MS   200    // Press longer than this = hold
 #define HOLD_REPEAT_MS     20    // Speed of cycling during hold
-
+#define DELAY_COUNT 4
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -45,7 +45,9 @@
 
 /* USER CODE BEGIN PV */
 uint32_t delays[] = {250, 500, 1000, 2000};
-const uint8_t DELAY_COUNT = 4;
+uint32_t active_delays[DELAY_COUNT];
+
+
 
 int8_t idx = 0;
 int8_t dir = 1;
@@ -103,6 +105,10 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
+  for (int i = 0; i < DELAY_COUNT; i++)
+  {
+      active_delays[i] = delays[i];  // start with normal delays
+  }
 
   /* USER CODE END 2 */
 
@@ -111,7 +117,8 @@ int main(void)
   while (1)
   {
 	  /*  LED BLINK LOGIC  */
-	  	  if (HAL_GetTick() - last_led_tick >= delays[idx])
+	  	  if (HAL_GetTick() - last_led_tick >= active_delays[idx])
+
 	  	    {
 	  	      last_led_tick = HAL_GetTick();
 	  	      HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
@@ -138,21 +145,32 @@ int main(void)
 	  	  /*  Button Release Detection */
 	  	    if (!btn && last_btn_state)
 	  	    {
+	  	        if (hold_active)
+	  	        {
+	  	          // Restore original delays
+	  	              for (int i = 0; i < DELAY_COUNT; i++)
+	  	                  active_delays[i] = delays[i];
+	  	        }
 	  	        if (!hold_active)
 	  	        {
-	  	            /* Wait for single/double click resolution */
-	  	            last_btn_tick = HAL_GetTick();
-	  	        }
-	  	        hold_active = 0;
+	  	              /* Wait for single/double click resolution */
+	  	              last_btn_tick = HAL_GetTick();
+	  	         }
+	  	         hold_active = 0;
+
 	  	    }
 
-	  	    /* -------- Hold Detection -------- */
+	  	    /*  Hold Detection */
 	  	    if (btn && !hold_active &&
 	  	      (HAL_GetTick() - btn_press_tick >= HOLD_THRESHOLD_MS))
 	  	    {
 	  	    	hold_active = 1;
 	  	    	click_count = 0;   // cancel click logic
 	  	    	last_hold_tick = HAL_GetTick();
+
+	  	    	 // HALVE the delays while holding
+	  	    	 for (int i = 0; i < DELAY_COUNT; i++)
+	  	    	      active_delays[i] = delays[i] / 2;
 	  	    }
 
 	  	    /* Hold Action (Fast Cycling)  */
@@ -166,7 +184,7 @@ int main(void)
 	  	    	else if (idx < 0) idx = DELAY_COUNT - 1;
 	  	    }
 
-	  	    /* -------- Click Resolution -------- */
+	  	    /* Click Resolution */
 	  	    if (!hold_active &&
 	  	      click_count > 0 &&
 	  	      (HAL_GetTick() - last_btn_tick > 200))

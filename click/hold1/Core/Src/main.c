@@ -26,8 +26,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-#define HOLD_THRESHOLD_MS   200    // Press longer than this = hold
-#define HOLD_REPEAT_MS     20    // Speed of cycling during hold
+#define HOLD_THRESHOLD_MS   100    // Press longer than this = hold
 #define DELAY_COUNT 4
 /* USER CODE END PTD */
 
@@ -46,8 +45,6 @@
 /* USER CODE BEGIN PV */
 uint32_t delays[] = {250, 500, 1000, 2000};
 uint32_t active_delays[DELAY_COUNT];
-
-
 
 int8_t idx = 0;
 int8_t dir = 1;
@@ -117,7 +114,8 @@ int main(void)
   while (1)
   {
 	  /*  LED BLINK LOGIC  */
-	  	  if (HAL_GetTick() - last_led_tick >= active_delays[idx])
+	  	  if(!hold_active &&
+	  		    (HAL_GetTick() - last_led_tick >= active_delays[idx]))
 
 	  	    {
 	  	      last_led_tick = HAL_GetTick();
@@ -175,13 +173,16 @@ int main(void)
 
 	  	    /* Hold Action (Fast Cycling)  */
 	  	    if (hold_active &&
-	  	      (HAL_GetTick() - last_hold_tick >= HOLD_REPEAT_MS))
+	  	      (HAL_GetTick() - last_hold_tick >= active_delays[idx]))
 	  	    {
 	  	    	last_hold_tick = HAL_GetTick();
+	  	    	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
 
 	  	    	idx += dir;
-	  	    	if (idx >= DELAY_COUNT) idx = 0;
-	  	    	else if (idx < 0) idx = DELAY_COUNT - 1;
+	  	    	if (idx >= DELAY_COUNT)
+	  	    		idx = 0;
+	  	    	else if (idx < 0)
+	  	    		idx = DELAY_COUNT - 1;
 	  	    }
 
 	  	    /* Click Resolution */

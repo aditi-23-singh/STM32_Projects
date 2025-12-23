@@ -48,11 +48,11 @@ Projects/
 
 
 
-#### **## Project 1: `click1` — Button Click Control**
+## **## Project 1: `click1` — Button Click Control**
 
 
 
-**### Features**
+#### **### Features**
 
 **- Single Click**
 
@@ -66,7 +66,7 @@ Projects/
 
 
 
-**### LED Behavior**
+#### **### LED Behavior**
 
 | Action 	| Result |
 
@@ -76,9 +76,9 @@ Projects/
 
 | Double Click 	| Reverse delay sequence direction |
 
+#### 
 
-
-**### Delay Values**
+#### **### Delay Values**
 
 
 

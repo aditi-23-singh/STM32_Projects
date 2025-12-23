@@ -188,7 +188,7 @@ int main(void)
 	  	    /* Click Resolution */
 	  	    if (!hold_active &&
 	  	      click_count > 0 &&
-	  	      (HAL_GetTick() - last_btn_tick > 200))
+	  	      (HAL_GetTick() - last_btn_tick > HOLD_THRESHOLD_MS))
 	  	    {
 	  	    	if (click_count == 1)
 	  	    	{

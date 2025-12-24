@@ -17,9 +17,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include <stdio.h>
 #include "main.h"
-#include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -30,11 +28,6 @@
 /* USER CODE BEGIN PTD */
 #define HOLD_THRESHOLD_MS   100    // Press longer than this = hold
 #define DELAY_COUNT 4
-#define MODE_IDLE   0
-#define MODE_SINGLE 1
-#define MODE_DOUBLE 2
-#define MODE_HOLD   3
-
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -65,90 +58,17 @@ uint32_t btn_press_tick = 0;
 uint32_t last_hold_tick = 0;
 uint8_t  hold_active = 0;
 
-uint8_t prev_mode = 255;
-uint32_t prev_delay = 0;
-
-uint8_t current_mode;
-
-
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-/* ================= LCD DRIVER (4-bit) ================= */
-
-void LCD_EnablePulse(void)
-{
-    HAL_GPIO_WritePin(LCD_EN_GPIO_Port, LCD_EN_Pin, GPIO_PIN_SET);
-    HAL_Delay(1);
-    HAL_GPIO_WritePin(LCD_EN_GPIO_Port, LCD_EN_Pin, GPIO_PIN_RESET);
-    HAL_Delay(1);
-}
-
-void LCD_Send4Bit(uint8_t data)
-{
-    HAL_GPIO_WritePin(LCD_D4_GPIO_Port, LCD_D4_Pin, (data & 0x01) ? GPIO_PIN_SET : GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(LCD_D5_GPIO_Port, LCD_D5_Pin, (data & 0x02) ? GPIO_PIN_SET : GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(LCD_D6_GPIO_Port, LCD_D6_Pin, (data & 0x04) ? GPIO_PIN_SET : GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(LCD_D7_GPIO_Port, LCD_D7_Pin, (data & 0x08) ? GPIO_PIN_SET : GPIO_PIN_RESET);
-
-    LCD_EnablePulse();
-}
-
-void LCD_Command(uint8_t cmd)
-{
-    HAL_GPIO_WritePin(LCD_RS_GPIO_Port, LCD_RS_Pin, GPIO_PIN_RESET);
-
-    LCD_Send4Bit(cmd >> 4);
-    LCD_Send4Bit(cmd & 0x0F);
-
-    HAL_Delay(2);
-}
-
-void LCD_Data(uint8_t data)
-{
-    HAL_GPIO_WritePin(LCD_RS_GPIO_Port, LCD_RS_Pin, GPIO_PIN_SET);
-
-    LCD_Send4Bit(data >> 4);
-    LCD_Send4Bit(data & 0x0F);
-
-    HAL_Delay(2);
-}
-void LCD_Init(void)
-{
-    HAL_Delay(20);
-
-    LCD_Command(0x33);
-    LCD_Command(0x32);
-    LCD_Command(0x28);   // 4-bit, 2 line
-    LCD_Command(0x0C);   // Display ON
-    LCD_Command(0x06);   // Entry mode
-    LCD_Command(0x01);   // Clear
-    HAL_Delay(5);
-}
-void LCD_SetCursor(uint8_t row, uint8_t col)
-{
-    uint8_t addr;
-    if (row == 0) addr = 0x80;
-    else if (row == 1) addr = 0xC0;
-    else if (row == 2) addr = 0x94;
-    else addr = 0xD4;
-
-    LCD_Command(addr + col);
-}
-
-void LCD_Print(char *str)
-{
-    while (*str)
-        LCD_Data(*str++);
-}
 
 /* USER CODE END 0 */
 
@@ -182,19 +102,10 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-  LCD_Init();
-
-  LCD_SetCursor(0,0);
-  LCD_Print("Mode: IDLE");
-
-  LCD_SetCursor(1,0);
-  LCD_Print("Delay: 250 ms");
-
   for (int i = 0; i < DELAY_COUNT; i++)
   {
       active_delays[i] = delays[i];  // start with normal delays
   }
-
 
   /* USER CODE END 2 */
 
@@ -293,54 +204,7 @@ int main(void)
 	  	    	click_count = 0;
 	  	    }
 
-
 	  	  last_btn_state = btn;
-
-	  	  /* ===== DETERMINE CURRENT MODE ===== */
-	  	  if (hold_active)
-	  	      current_mode = MODE_HOLD;
-	  	  else if (click_count == 2)
-	  	      current_mode = MODE_DOUBLE;
-	  	  else if (click_count == 1)
-	  	      current_mode = MODE_SINGLE;
-	  	  else
-	  	      current_mode = MODE_IDLE;
-
-	  	  char buffer[20];
-
-	  	/* ===== UPDATE LCD ROW 1: MODE (only if changed) ===== */
-	  	if (current_mode != prev_mode)
-	  	{
-	  	    LCD_SetCursor(0, 0);
-
-	  	    switch (current_mode)
-	  	    {
-	  	        case MODE_HOLD:
-	  	            LCD_Print("Mode: HOLD");
-	  	            break;
-	  	        case MODE_DOUBLE:
-	  	            LCD_Print("Mode: DOUBLE ");
-	  	            break;
-	  	        case MODE_SINGLE:
-	  	            LCD_Print("Mode: SINGLE ");
-	  	            break;
-	  	        default:
-	  	            LCD_Print("Mode: IDLE");
-	  	            break;
-	  	    }
-
-	  	    prev_mode = current_mode;
-	  	}
-
-	  	/* ===== UPDATE LCD ROW 2: DELAY (only if changed) ===== */
-	  	if (active_delays[idx] != prev_delay)
-	  	{
-	  	    LCD_SetCursor(1, 0);
-	  	    sprintf(buffer, "Delay: %lu ms   ", active_delays[idx]);
-	  	    LCD_Print(buffer);
-
-	  	    prev_delay = active_delays[idx];
-	  	}
 
     /* USER CODE END WHILE */
 
@@ -364,7 +228,10 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL12;
+  RCC_OscInitStruct.PLL.PREDIV = RCC_PREDIV_DIV1;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -374,14 +241,51 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_GPIO_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+
+  /* USER CODE END MX_GPIO_Init_1 */
+
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, LD4_Pin|LD3_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : B1_Pin */
+  GPIO_InitStruct.Pin = B1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_EVT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LD4_Pin LD3_Pin */
+  GPIO_InitStruct.Pin = LD4_Pin|LD3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */

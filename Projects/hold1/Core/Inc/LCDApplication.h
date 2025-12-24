@@ -1,6 +1,0 @@
-#ifndef SRC_LCDAPPLICATION_H_
-#define SRC_LCDAPPLICATION_H_
-
-
-
-#endif /* SRC_LCDAPPLICATION_H_ */

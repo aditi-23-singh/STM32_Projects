@@ -316,16 +316,16 @@ int main(void)
 	  	    switch (current_mode)
 	  	    {
 	  	        case MODE_HOLD:
-	  	            LCD_Print("Mode: HOLD");
+	  	        	LCD_Print("Mode: HOLD        ");
 	  	            break;
 	  	        case MODE_DOUBLE:
-	  	            LCD_Print("Mode: DOUBLE ");
+	  	        	LCD_Print("Mode: DOUBLE      ");
 	  	            break;
 	  	        case MODE_SINGLE:
-	  	            LCD_Print("Mode: SINGLE ");
+	  	        	LCD_Print("Mode: SINGLE      ");
 	  	            break;
 	  	        default:
-	  	            LCD_Print("Mode: IDLE");
+	  	        	LCD_Print("Mode: IDLE        ");
 	  	            break;
 	  	    }
 

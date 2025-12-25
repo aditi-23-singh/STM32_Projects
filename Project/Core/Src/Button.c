@@ -17,6 +17,7 @@ void DetectButton()
 	 	 btn = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
 
 	    /* Detect rising edge */
+
 	    if (btn && !last_btn_state)
 	    {
 	        btn_press_tick = HAL_GetTick();

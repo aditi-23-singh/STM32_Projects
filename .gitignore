@@ -1,24 +1,49 @@
-# STM32CubeIDE build folders
+# =========================
+# Build / Debug folders
+# =========================
 Debug/
 Release/
+build/
+out/
 
-# IDE / build system
+# =========================
+# STM32CubeIDE / Eclipse
+# =========================
+.metadata/
 .settings/
-.build/
 *.launch
+*.log
+*.tmp
 
-# Compiled outputs
+# =========================
+# Object & binary files
+# =========================
 *.o
-*.d
+*.a
 *.elf
-*.map
 *.hex
 *.bin
+*.map
+*.d
+*.su
 
-# OS / editor
+# =========================
+# IDE specific
+# =========================
 .vscode/
+.idea/
+*.swp
+
+# =========================
+# OS generated
+# =========================
 .DS_Store
 Thumbs.db
 
-# CubeMX backup
-*.bak
+# =========================
+# STM32CubeIDE project files
+# =========================
+.project
+.cproject
+.mxproject
+

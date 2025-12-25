@@ -26,6 +26,7 @@
 #include "LCD.h"
 #include "LEDApplication.h"
 #include "Button.h"
+#include "App.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -90,15 +91,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-  LCD_Init();
-
-  LCD_SetCursor(0,0);
-  LCD_Print("Mode: IDLE");
-
-  LCD_SetCursor(1,0);
-  LCD_Print("Delay: 250 ms");
-
-  LEDInit();
+  App_Init();
 
 
   /* USER CODE END 2 */

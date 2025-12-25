@@ -1,5 +1,4 @@
 #include "Button.h"
-
 #include "stm32f0xx_hal.h"
 #include "stdio.h"
 
@@ -22,7 +21,7 @@ void DetectButton()
 	    {
 	        btn_press_tick = HAL_GetTick();
 	        last_btn_tick = btn_press_tick;
-	        if (click_count <= 2)           // Restrict clicks to max 2
+	        if (click_count <= 2)
 	            click_count++;
 	    }
 
@@ -34,18 +33,18 @@ void DetectButton()
 	            /* Start click resolution timer on release */
 	            last_btn_tick = HAL_GetTick();
 	        }
-	        hold_active = 0;  // Always clear hold on release
+	        hold_active = 0;
 	    }
 
 	    /* Hold Detection */
 	    if (btn && !hold_active && (HAL_GetTick() - btn_press_tick >= HOLD_THRESHOLD_MS))
 	    {
 	        hold_active = 1;
-	        click_count = 0;   // cancel click logic
+	        click_count = 0;
 	        last_hold_tick = HAL_GetTick();
 	    }
 
-	    /* Update last_btn_state at END of function  */
+
 	    last_btn_state = btn;
 }
 

@@ -1,6 +1,6 @@
 #include "LCDApplication.h"
 #include "LEDApplication.h"
-
+#include "gpio.h"
 #include "stm32f0xx_hal.h"
 #include "stdio.h"
 
@@ -14,8 +14,8 @@ uint32_t prev_delay = 0;
 
 uint8_t current_mode;
 
-extern int8_t idx;
-extern int8_t dir;
+extern int8_t index;
+extern int8_t direction;
 
 extern uint32_t active_delays[DELAY_COUNT];
 
@@ -40,7 +40,7 @@ void HandleLCDApplication()
 
 	    char buffer[20];
 
-	    /* Update Mode Display - Only when changed */
+	    /* Update Mode Display */
 	    if (current_mode != prev_mode)
 	    {
 	        LCD_SetCursor(0, 0);
@@ -64,14 +64,14 @@ void HandleLCDApplication()
 	        prev_mode = current_mode;
 	    }
 
-	    /* Update Delay Display - Only when changed */
-	    if (active_delays[idx] != prev_delay)
+	    /* Update Delay Display  */
+	    if (active_delays[index] != prev_delay)
 	    {
 	        LCD_SetCursor(1, 0);
-	        sprintf(buffer, "Delay: %lu ms   ", active_delays[idx]);
+	        sprintf(buffer, "Delay: %lu ms   ", active_delays[index]);
 	        LCD_Print(buffer);
 
-	        prev_delay = active_delays[idx];
+	        prev_delay = active_delays[index];
 	    }
 }
 

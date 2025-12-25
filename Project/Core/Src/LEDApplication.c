@@ -7,8 +7,8 @@ uint32_t delays[] =
 { 250, 500, 1000, 2000 };
 uint32_t active_delays[DELAY_COUNT];
 
-int8_t idx = 0;
-int8_t dir = 1;
+int8_t index = 0;
+int8_t direction = 1;
 
 uint32_t last_led_tick = 0;
 
@@ -22,25 +22,25 @@ extern uint8_t hold_active;
 void LEDInit()
 {
 	for (int i = 0; i < DELAY_COUNT; i++) {
-		active_delays[i] = delays[i];  // start with normal delays
+		active_delays[i] = delays[i];
 	}
 }
 
 void HandleLEDApplication()
 {
 	 /* LED BLINK LOGIC */
-	    if (!hold_active && (HAL_GetTick() - last_led_tick >= active_delays[idx]))
+	    if (!hold_active && (HAL_GetTick() - last_led_tick >= active_delays[index]))
 	    {
 	        last_led_tick = HAL_GetTick();
 	        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
 
-	        /* AUTO move to next delay */
-	        idx += dir;
 
-	        if (idx >= DELAY_COUNT)
-	            idx = 0;
-	        else if (idx < 0)
-	            idx = DELAY_COUNT - 1;
+	        index += direction;
+
+	        if (index >= DELAY_COUNT)
+	            index = 0;
+	        else if (index < 0)
+	            index = DELAY_COUNT - 1;
 	    }
 
 	    /* Hold Mode - Halve delays ONCE when entering */
@@ -60,16 +60,16 @@ void HandleLEDApplication()
 	    }
 
 	    /* Hold Action (Fast Cycling) */
-	    if (hold_active && (HAL_GetTick() - last_hold_tick >= active_delays[idx]))
+	    if (hold_active && (HAL_GetTick() - last_hold_tick >= active_delays[index]))
 	    {
 	        last_hold_tick = HAL_GetTick();
 	        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
 
-	        idx += dir;
-	        if (idx >= DELAY_COUNT)
-	            idx = 0;
-	        else if (idx < 0)
-	            idx = DELAY_COUNT - 1;
+	        index += direction;
+	        if (index >= DELAY_COUNT)
+	            index = 0;
+	        else if (index < 0)
+	            index = DELAY_COUNT - 1;
 	    }
 
 	    /* Click Resolution*/
@@ -77,15 +77,15 @@ void HandleLEDApplication()
 	    {
 	        if (click_count == 1)
 	        {
-	            idx += dir;
-	            if (idx >= DELAY_COUNT)
-	                idx = 0;
-	            else if (idx < 0)
-	                idx = DELAY_COUNT - 1;
+	            index += direction;
+	            if (index >= DELAY_COUNT)
+	                index = 0;
+	            else if (index < 0)
+	                index = DELAY_COUNT - 1;
 	        }
-	        else  // click_count == 2
+	        else
 	        {
-	            dir = -dir;
+	            direction = -direction;
 	        }
 
 	        click_count = 0;

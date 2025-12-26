@@ -1,6 +1,9 @@
-#ifndef SRC_LCDAPPLICATION_H_
-#define SRC_LCDAPPLICATION_H_
+#ifndef INC_LCDAPPLICATION_H_
+#define INC_LCDAPPLICATION_H_
 
-void HandleLCDApplication();
+#include "LEDApplication.h"
+#include "LCD.h"
+#include "stdio.h"
+void UpdateDisplay(void);
 
-#endif /* SRC_LCDAPPLICATION_H_ */
+#endif /* INC_LCDAPPLICATION_H_ */

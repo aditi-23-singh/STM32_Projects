@@ -4,16 +4,6 @@
   * @file           : main.c
   * @brief          : Main program body
   ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
@@ -23,12 +13,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "LCD.h"
-#include "LEDApplication.h"
-#include "LCDApplication.h"
-#include "Button.h"
-#include "App.h"
-#include "UARTCommunication.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,6 +45,12 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+static void HandleTick(void)
+{
+	UpdateButton();
+    UpdateLED();
+}
 
 /* USER CODE END 0 */
 
@@ -94,8 +85,16 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  App_Init();
 
+    /* Start with LED off */
+    HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+
+    LCD_Init();
+
+    LCD_SetCursor(0, 0);
+    LCD_Print("Mode: IDLE      ");
+    LCD_SetCursor(1, 0);
+    LCD_Print("Delay: 250 ms   ");
 
   /* USER CODE END 2 */
 
@@ -103,10 +102,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  DetectButton();
-	  UART_ProcessReceivedData();
-	  HandleLEDApplication();
-	  HandleLCDApplication();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -158,6 +153,18 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_SYSTICK_Callback(void)
+{
+	HandleTick();
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(huart -> Instance == USART1)
+	{
+		UART_OnByteReceived();
+	}
+}
 /* USER CODE END 4 */
 
 /**

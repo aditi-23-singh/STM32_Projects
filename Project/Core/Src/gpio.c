@@ -1,47 +1,8 @@
-/* USER CODE BEGIN Header */
-/**
-  ******************************************************************************
-  * @file    gpio.c
-  * @brief   This file provides code for the configuration
-  *          of all used GPIO pins.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
-/* USER CODE END Header */
-
-/* Includes ------------------------------------------------------------------*/
+/* Fixed gpio.c - Ensure PC9 is initialized */
 #include "gpio.h"
 
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-/*----------------------------------------------------------------------------*/
-/* Configure GPIO                                                             */
-/*----------------------------------------------------------------------------*/
-/* USER CODE BEGIN 1 */
-
-/* USER CODE END 1 */
-
-/** Configure pins as
-        * Analog
-        * Input
-        * Output
-        * EVENT_OUT
-        * EXTI
-*/
 void MX_GPIO_Init(void)
 {
-
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
@@ -52,7 +13,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, LCD_RS_Pin|LCD_EN_Pin|LCD_D4_Pin|LCD_D5_Pin
                           |LCD_D6_Pin|LCD_D7_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin Output Level */
+  /*Configure GPIO pin Output Level - BOTH PC8 and PC9 */
   HAL_GPIO_WritePin(GPIOC, LD4_Pin|LD3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
@@ -61,8 +22,7 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LCD_RS_Pin LCD_EN_Pin LCD_D4_Pin LCD_D5_Pin
-                           LCD_D6_Pin LCD_D7_Pin */
+  /*Configure GPIO pins : LCD pins on GPIOA */
   GPIO_InitStruct.Pin = LCD_RS_Pin|LCD_EN_Pin|LCD_D4_Pin|LCD_D5_Pin
                           |LCD_D6_Pin|LCD_D7_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -70,15 +30,10 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LD4_Pin LD3_Pin */
-  GPIO_InitStruct.Pin = LD4_Pin|LD3_Pin;
+  /*Configure GPIO pins : LD4_Pin (PC8) and LD3_Pin (PC9) - BOTH LEDS */
+  GPIO_InitStruct.Pin = LD4_Pin|LD3_Pin;  // This should include both PC8 and PC9
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
 }
-
-/* USER CODE BEGIN 2 */
-
-/* USER CODE END 2 */

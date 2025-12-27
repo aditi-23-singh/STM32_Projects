@@ -1,10 +1,14 @@
-#ifndef INC_LEDAPPLICATION_H_
-#define INC_LEDAPPLICATION_H_
+
+#ifndef LEDAPPLICATION_H
+#define LEDAPPLICATION_H
 
 #include "main.h"
-#include "LCDApplication.h"
+#include <stdint.h>
+
 #define DELAY_COUNT 4
+
+/* Function prototypes */
 void UpdateLED(void);
 void WrapIndex(void);
 
-#endif /* INC_LEDAPPLICATION_H_ */
+#endif /* LEDAPPLICATION_H */

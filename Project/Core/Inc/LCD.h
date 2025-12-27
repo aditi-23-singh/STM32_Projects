@@ -1,23 +1,14 @@
-#ifndef __LCD_H
-#define __LCD_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef LCD_H
+#define LCD_H
 
 #include "main.h"
-#include "stdio.h"
-#include "strings.h"
+#include <stdint.h>
 
-/* Public function prototypes */
+/* Function prototypes */
 void LCD_Init(void);
-void LCD_Clear(void);
 void LCD_SetCursor(uint8_t row, uint8_t col);
 void LCD_Print(char *str);
-void LCD_PrintChar(char c);
+void LCD_Command(uint8_t cmd);
+void LCD_Data(uint8_t data);
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __LCD_H */
+#endif /* LCD_H */

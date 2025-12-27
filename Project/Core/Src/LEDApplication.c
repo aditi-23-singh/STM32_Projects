@@ -9,6 +9,7 @@ uint8_t toggle_count = 0;
 int8_t Delay_index = 0;
 int8_t Direction = 1;
 
+
 extern uint8_t current_mode;
 
 void WrapIndex(void)
@@ -23,22 +24,28 @@ void UpdateLED(void)
 {
     led_timer++;
 
+
     switch (current_mode)
     {
-        case 3:
-            active_LED_delays[Delay_index] = LED_delays[Delay_index] / 2u;
-            if (active_LED_delays[Delay_index] == 0u)
-                    active_LED_delays[Delay_index] = 1u;
+        case 2: // DOUBLE CLICK detected
+            Direction = -Direction; // Reverse direction immediately
+            Delay_index += Direction; // Move to the previous/next index immediately
+            WrapIndex(); // Ensure index stays in bounds
+            current_mode = 0;        // Reset to IDLE so it doesn't flip again
             break;
-        case 2:
-            Direction = -Direction;
-            WrapIndex();
-            break;
-        case 1:
+
+        case 1: // SINGLE CLICK
             Delay_index += Direction;
             WrapIndex();
+            current_mode = 0;
             break;
+
+        case 3: // HOLD
+            active_LED_delays[Delay_index] = LED_delays[Delay_index] / 2u;
+            break;
+
         default:
+            active_LED_delays[Delay_index] = LED_delays[Delay_index];
             break;
     }
 

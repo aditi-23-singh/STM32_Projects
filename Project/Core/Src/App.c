@@ -1,6 +1,6 @@
-/* Modified App.c - ADD UART INITIALIZATION */
+
 #include <ButtonHandler.h>
-#include <UART_Application.h>  // NEW: Add this include
+#include <UART_Application.h>
 #include "App.h"
 #include "LCD.h"
 #include "LEDApplication.h"
@@ -21,5 +21,5 @@ void App_Init(void)
 
     LEDInit();
 
-    UART_Comm_Init();  // NEW: Initialize UART
+    UART_Comm_Init();
 }

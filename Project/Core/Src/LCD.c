@@ -55,11 +55,7 @@ void LCD_Init(void)
     HAL_Delay(5);
 }
 
-//void LCD_Clear(void)
-//{
-//    LCD_Command(0x01);
-//    HAL_Delay(2);
-//}
+
 
 void LCD_SetCursor(uint8_t row, uint8_t col)
 {
@@ -78,7 +74,4 @@ void LCD_Print(char *str)
         LCD_Data(*str++);
 }
 
-//void LCD_PrintChar(char c)
-//{
-//    LCD_Data(c);
-//}
+

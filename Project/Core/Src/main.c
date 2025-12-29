@@ -53,6 +53,7 @@ void SystemClock_Config(void);
 static void HandleTick(void)
 {
     UpdateButton();
+	//ButtonApp_Update();
     UpdateLED();
 
 }
@@ -104,6 +105,7 @@ int main(void)
 
     /* Initialize UART for communication between boards */
     UART_AppInit();
+//    ButtonApp_Init();
 
   /* USER CODE END 2 */
 
@@ -113,6 +115,7 @@ int main(void)
   {
     /* USER CODE END WHILE */
 	//  UpdateDisplay();
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

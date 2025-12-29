@@ -1,5 +1,6 @@
 #include "UART_Application.h"
 #include "LEDApplication.h"
+#include "LedController.h"
 
 extern UART_HandleTypeDef huart1;
 extern uint8_t CurrentMode;

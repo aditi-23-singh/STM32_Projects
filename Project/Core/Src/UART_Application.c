@@ -2,7 +2,7 @@
 #include "LEDApplication.h"
 
 extern UART_HandleTypeDef huart1;
-extern uint8_t current_mode;
+extern uint8_t CurrentMode;
 
 static uint8_t uart_rx_byte = 0;
 

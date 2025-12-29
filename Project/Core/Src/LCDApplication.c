@@ -1,10 +1,10 @@
 #include "LCDApplication.h"
 
 uint8_t prev_mode = 255;
-uint8_t current_mode = 0;
+uint8_t CurrentMode = 0;
 
-extern uint8_t local_mode;
-extern uint8_t remote_mode;
+extern uint8_t LocalMode;
+extern uint8_t RemoteMode;
 
 void UpdateDisplay(void)
 {
@@ -12,10 +12,10 @@ void UpdateDisplay(void)
     static uint8_t display_mode = 0;  // Separate variable for display
 
     // Update display when mode changes
-    if (current_mode != prev_mode)
+    if (CurrentMode != prev_mode)
     {
         LCD_SetCursor(0, 0);
-        switch (current_mode)
+        switch (CurrentMode)
         {
             case 3:
                 LCD_Print("Mode: HOLD      ");
@@ -44,7 +44,7 @@ void UpdateDisplay(void)
                 display_mode = 0;
                 break;
         }
-        prev_mode = current_mode;
+        prev_mode = CurrentMode;
     }
 
     // Auto-clear temporary mode display after 2 seconds
@@ -60,19 +60,19 @@ void UpdateDisplay(void)
     char buffer[20];
     LCD_SetCursor(1, 0);
 
-    if (local_mode == 0 && remote_mode == 0)
+    if (LocalMode == 0 && RemoteMode == 0)
     {
         snprintf(buffer, sizeof(buffer), "LED: OFF        ");
     }
-    else if (local_mode == 3 || remote_mode == 3)
+    else if (LocalMode == 3 || RemoteMode == 3)
     {
         snprintf(buffer, sizeof(buffer), "LED: ON (HOLD)  ");
     }
-    else if (local_mode == 1 || remote_mode == 1)
+    else if (LocalMode == 1 || RemoteMode == 1)
     {
         snprintf(buffer, sizeof(buffer), "LED: FAST BLINK ");
     }
-    else if (local_mode == 2 || remote_mode == 2)
+    else if (LocalMode == 2 || RemoteMode == 2)
     {
         snprintf(buffer, sizeof(buffer), "LED: SLOW BLINK ");
     }

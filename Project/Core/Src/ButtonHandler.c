@@ -4,7 +4,7 @@
 #define CLICK_WINDOW_MS  150
 #define DEBOUNCE_TIME_MS 10
 
-extern uint8_t current_mode;
+extern uint8_t CurrentMode;
 
 /* Button state */
 uint8_t btn_stable = 0;
@@ -56,7 +56,7 @@ void UpdateButton(void)
             btn_hold = 1;
             btn_clicks = 0;
             btn_click_timer = 0;
-            current_mode = 3;
+            CurrentMode = 3;
             UART_SendEvent(EVT_HOLD_START);
         }
     }
@@ -67,7 +67,7 @@ void UpdateButton(void)
 
         if (btn_hold)
         {
-            current_mode = 0;
+            CurrentMode = 0;
             UART_SendEvent(EVT_HOLD_END);
         }
 
@@ -84,12 +84,12 @@ void UpdateButton(void)
         {
             if (btn_clicks == 1)
             {
-                current_mode = 1;
+                CurrentMode = 1;
                 UART_SendEvent(EVT_SINGLE_CLICK);
             }
             else
             {
-                current_mode = 2;
+                CurrentMode = 2;
                 UART_SendEvent(EVT_DOUBLE_CLICK);
             }
 

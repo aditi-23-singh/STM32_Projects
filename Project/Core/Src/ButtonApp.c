@@ -17,19 +17,21 @@ void ButtonApp_Update(void)
 	switch(event)
 	{
 	case BTN_EVENT_SINGLE_CLICK:
-		//CurrentMode=0;
+//	CurrentMode=0;
 		CurrentMode=1;
 		UART_SendEvent(EVT_SINGLE_CLICK);
+
 		break;
 
 	case BTN_EVENT_DOUBLE_CLICK:
-		//CurrentMode=0;
+//		CurrentMode=0;
 		CurrentMode = 2;
 		UART_SendEvent(EVT_DOUBLE_CLICK);
+
 		break;
 
 	 case BTN_EVENT_HOLD_START:
-		// CurrentMode=0;
+//		 CurrentMode=0;
 		CurrentMode = 3;
 		UART_SendEvent(EVT_HOLD_START);
 		break;

@@ -2,7 +2,7 @@
 
 #define FAST_TOGGLE_MS 25U
 #define SLOW_TOGGLE_MS 100U
-
+extern uint8_t CurrentMode;
 void LedController_Init(LedController_t *ctrl)
 {
 	ctrl-> mode=LED_MODE_IDLE;
@@ -42,6 +42,7 @@ void LedController_Update(
 	if (ctrl->durationTimer >= BLINK_DURATION_MS) {
 		LedController_SetMode(ctrl, LED_MODE_IDLE);
 		setFn(0);
+		CurrentMode = 0;
 	}
 	break;
 
@@ -57,6 +58,7 @@ void LedController_Update(
 	if (ctrl->durationTimer >= BLINK_DURATION_MS) {
 		LedController_SetMode(ctrl, LED_MODE_IDLE);
 		setFn(0);
+		CurrentMode = 0;
 	}
 	break;
 

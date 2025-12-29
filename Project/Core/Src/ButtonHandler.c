@@ -1,8 +1,8 @@
 #include "ButtonHandler.h"
 
-#define HOLD_TIME_MS     150
-#define CLICK_WINDOW_MS  100
-#define DEBOUNCE_TIME_MS 20
+#define HOLD_TIME_MS     175
+#define CLICK_WINDOW_MS  150
+#define DEBOUNCE_TIME_MS 10
 
 extern uint8_t current_mode;
 

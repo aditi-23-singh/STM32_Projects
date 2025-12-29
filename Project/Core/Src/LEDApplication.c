@@ -17,13 +17,27 @@ uint32_t local_blink_timer = 0;    // Timer for LD3 blinking
 uint32_t local_duration_timer = 0; // Duration timer for LD3 (1 second countdown)
 uint32_t remote_blink_timer = 0;   // Timer for LD4 blinking
 uint32_t remote_duration_timer = 0;// Duration timer for LD4 (1 second countdown)
+uint8_t prev_local_mode = 0;
 
 extern uint8_t current_mode;
 
 void UpdateLED(void)
 {
-    // Sync local_mode with current_mode from button handler
-    local_mode = current_mode;
+	// Check if the mode has changed since the last millisecond
+	    if (current_mode != prev_local_mode)
+	    {
+	        // RESET TIMERS: This makes the 1s duration start over for the new mode
+	        local_duration_timer = 0;
+	        local_blink_timer = 0;
+
+	        // Ensure the LED starts in a known state for the new mode
+	        if (current_mode == 1 || current_mode == 2) {
+	             HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
+	        }
+	    }
+	    prev_local_mode = current_mode;
+
+	    local_mode = current_mode;
 
     // --- LOCAL LED (LD3) CONTROL ---
     switch (local_mode)
@@ -158,5 +172,7 @@ void UpdateLED(void)
 
 void SetRemoteMode(uint8_t mode)
 {
-    remote_mode = mode;
+	remote_mode = mode;
+	    remote_duration_timer = 0; // Ensures Board B starts the 1s timer from zero
+	    remote_blink_timer = 0;    // Ensures Board B starts the first blink immediately
 }

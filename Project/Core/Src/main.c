@@ -52,8 +52,8 @@ void SystemClock_Config(void);
 
 static void HandleTick(void)
 {
-    UpdateButton();
-	//ButtonApp_Update();
+//    UpdateButton();
+	ButtonApp_Update();
     UpdateLED();
 
 }

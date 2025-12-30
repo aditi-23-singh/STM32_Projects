@@ -1,75 +1,96 @@
 #include "ButtonCore.h"
 
-void ButtonCore_Init(ButtonCore_t *btn)
-{
-	btn->stable=0;
-	btn->prev=0;
-	btn->hold=0;
-	btn->clicks=0;
+void ButtonCore_Init(Button_t *btn, GPIO_TypeDef* Port, uint16_t Pin) {
+    btn->GPIO_Port = Port;
+    btn->GPIO_Pin = Pin;
 
-	btn->debounceTimer=0;
-	btn->pressTimer=0;
-	btn->clickTimer=0;
-}
-ButtonEvent_t ButtonCore_Update(ButtonCore_t *btn, uint8_t rawState)
-{
-	ButtonEvent_t event =BTN_EVENT_NONE;
-	if(rawState!=btn->stable)
-	{
-		btn->debounceTimer++;
-		if(btn->debounceTimer >= DEBOUNCE_TIME_MS)
-		{
-			btn->stable=rawState;
-			btn->debounceTimer=0;
-		}
-	}
-	else
-	{
-		btn->debounceTimer=0;
-	}
-	//rising edge
 
-	if(btn->stable && !btn->prev)
-	{
-		btn->pressTimer=0;
-		btn->clickTimer=0;
-		if(btn->clicks<2)
-			btn->clicks++;
-	}
-	//hold
-	if(btn->stable)
-	{
-		btn->pressTimer++;
-		if(!btn->hold && btn->pressTimer >=HOLD_TIME_MS)
-		{
-			btn->hold=1;
-			btn->clicks=0;
-			event= BTN_EVENT_HOLD_START;
-		}
-	}
-	//falling edge
-	if(!btn->stable && btn->prev)
-	{
-		//
-		if(btn->hold)
-		{
-			btn->hold=0;
-			event =BTN_EVENT_HOLD_END;
-		}
-		btn->pressTimer=0;
-	}
-	//CLICK DECISION
-	if(!btn->hold && !btn->stable && btn->clicks >0)
-	{
-		btn-> clickTimer++;
-		if(btn->clickTimer>=CLICK_WINDOW_MS)
-		{
-			event=(btn->clicks==1)?BTN_EVENT_SINGLE_CLICK:BTN_EVENT_DOUBLE_CLICK;
-			btn->clicks=0;
-			btn->clickTimer=0;
-		}
-	}
-	btn->prev=btn->stable;
-	return event;
+    btn->btn_stable = 0;
+    btn->btn_prev = 0;
+    btn->btn_debounce_time = 0;
+    btn->btn_press_start = 0;
+    btn->btn_clicks = 0;
+    btn->btn_hold = 0;
+    btn->btn_click_timer = 0;
+    btn->pending_event = BUTTON_EVENT_NONE;
 }
 
+
+static void Button_Debounce(Button_t *btn, uint8_t raw, uint32_t now) {
+    if (raw != btn->btn_stable) {
+        if (btn->btn_debounce_time == 0) {
+            btn->btn_debounce_time = now;
+        }
+        if (now - btn->btn_debounce_time >= DEBOUNCE_TIME_MS) {
+            btn->btn_stable = raw;
+        }
+    } else {
+        btn->btn_debounce_time = 0;
+    }
+}
+
+void ButtonCore_Update(Button_t *btn)
+{
+    uint8_t btn_raw = (HAL_GPIO_ReadPin(Button_GPIO_Port, Button_Pin) == GPIO_PIN_SET) ? 1 : 0;
+    uint32_t now = HAL_GetTick();
+
+    Button_Debounce(btn, btn_raw, now);
+
+    if (btn->btn_stable && !btn->btn_prev) {
+        btn->btn_press_start = now;
+        if (!btn->btn_hold)
+        {
+            btn->btn_clicks++;
+
+            if (btn->btn_clicks > 2)
+            	btn->btn_clicks = 2;
+        }
+        btn->btn_release_start = 0;
+    }
+
+    if (btn->btn_stable && !btn->btn_hold && (now - btn->btn_press_start >= HOLD_TIME_MS)) {
+        btn->btn_hold = 1;
+        btn->btn_clicks = 0;
+        btn->pending_event = BUTTON_EVENT_HOLD_START;
+    }
+
+    if (!btn->btn_stable && btn->btn_prev) {
+        if (btn->btn_hold)
+        {
+            btn->pending_event = BUTTON_EVENT_HOLD_END;
+            btn->btn_hold = 0;
+        }
+        else
+        {
+            btn->btn_release_start = now;
+        }
+        btn->btn_press_start = 0;
+    }
+
+    if (!btn->btn_hold && !btn->btn_stable && (btn->btn_clicks > 0))
+    {
+        btn->btn_click_timer++;
+        if (btn->btn_click_timer >= CLICK_WINDOW_MS)
+        {
+            if (btn->btn_clicks == 1)
+            {
+                btn->pending_event = BUTTON_EVENT_SINGLE_CLICK;
+            } else if(btn->btn_clicks == 2)
+            {
+                btn->pending_event = BUTTON_EVENT_DOUBLE_CLICK;
+            }
+
+            btn->btn_clicks = 0;
+            btn->btn_click_timer = 0;
+        }
+    }
+
+    btn->btn_prev = btn->btn_stable;
+}
+
+BUTTON_EVENT_TYPEDEF_ENUM GetEvent(Button_t *btn)
+{
+	BUTTON_EVENT_TYPEDEF_ENUM ev = btn->pending_event;
+	btn->pending_event = BUTTON_EVENT_NONE;
+	return ev;
+}

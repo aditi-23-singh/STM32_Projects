@@ -1,15 +1,16 @@
-//#ifndef BUTTONHANDLER_H
-//#define BUTTONHANDLER_H
-//
-//#include "main.h"
-//#include <stdint.h>
-//
-//#define EVT_SINGLE_CLICK  0x01
-//#define EVT_DOUBLE_CLICK  0x02
-//#define EVT_HOLD_START    0x03
-//#define EVT_HOLD_END      0x04
-//
-//void UpdateButton(void);
-//void UART_SendEvent(uint8_t evt);
-//
-//#endif
+#ifndef INC_BUTTONHANDLER_H_
+#define INC_BUTTONHANDLER_H_
+
+#include "main.h"
+#include "stm32f0xx_hal.h"
+
+typedef struct {
+	EVENT_CODES_ENUM PreviousEvent;
+	EVENT_CODES_ENUM CurrentEvent;
+
+	bool NewEventReceived;
+} ButtonApplicationTypedefStruct;
+
+void UpdateButton(void);
+
+#endif /* INC_BUTTONHANDLER_H_ */

@@ -1,21 +1,57 @@
 #include "LCDApplication.h"
+#include "LCD.h"
 
 uint8_t prev_mode = 255;
-uint8_t CurrentMode = 0;
+uint8_t current_mode = 0;
 
-extern uint8_t LocalMode;
-extern uint8_t RemoteMode;
+extern uint8_t local_mode;
+extern uint8_t remote_mode;
+
+static void LCD_SetCursor(uint8_t row, uint8_t col)
+{
+    uint8_t addr;
+    if (row == 0)
+        addr = 0x80 + col;
+    else
+        addr = 0xC0 + col;
+
+    LCD_Command(addr);
+}
+
+static void LCD_Print(char *str)
+{
+    while (*str)
+        LCD_Data(*str++);
+}
+
+void LCD_Init(void)
+{
+    HAL_Delay(50);
+    LCD_Command(0x33);
+    HAL_Delay(5);
+    LCD_Command(0x32);
+    HAL_Delay(5);
+    LCD_Command(0x28);   /* 4-bit, 2 line, 5x8 dots */
+    LCD_Command(0x0C);   /* Display ON, Cursor OFF */
+    LCD_Command(0x06);   /* Entry mode: increment cursor */
+    LCD_Command(0x01);   /* Clear display */
+    HAL_Delay(5);
+
+	LCD_SetCursor(0, 0);
+	LCD_Print("Mode: IDLE      ");
+	LCD_SetCursor(1, 0);
+	LCD_Print("LED: OFF        ");
+}
 
 void UpdateDisplay(void)
 {
     static uint32_t last_mode_change = 0;
     static uint8_t display_mode = 0;  // Separate variable for display
 
-    // Update display when mode changes
-    if (CurrentMode != prev_mode)
+    if (current_mode != prev_mode)
     {
         LCD_SetCursor(0, 0);
-        switch (CurrentMode)
+        switch (current_mode)
         {
             case 3:
                 LCD_Print("Mode: HOLD      ");
@@ -44,7 +80,7 @@ void UpdateDisplay(void)
                 display_mode = 0;
                 break;
         }
-        prev_mode = CurrentMode;
+        prev_mode = current_mode;
     }
 
     // Auto-clear temporary mode display after 2 seconds
@@ -60,19 +96,19 @@ void UpdateDisplay(void)
     char buffer[20];
     LCD_SetCursor(1, 0);
 
-    if (LocalMode == 0 && RemoteMode == 0)
+    if (local_mode == 0 && remote_mode == 0)
     {
         snprintf(buffer, sizeof(buffer), "LED: OFF        ");
     }
-    else if (LocalMode == 3 || RemoteMode == 3)
+    else if (local_mode == 3 || remote_mode == 3)
     {
         snprintf(buffer, sizeof(buffer), "LED: ON (HOLD)  ");
     }
-    else if (LocalMode == 1 || RemoteMode == 1)
+    else if (local_mode == 1 || remote_mode == 1)
     {
         snprintf(buffer, sizeof(buffer), "LED: FAST BLINK ");
     }
-    else if (LocalMode == 2 || RemoteMode == 2)
+    else if (local_mode == 2 || remote_mode == 2)
     {
         snprintf(buffer, sizeof(buffer), "LED: SLOW BLINK ");
     }

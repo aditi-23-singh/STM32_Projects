@@ -13,11 +13,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "ButtonHandler.h"
-#include "LEDApplication.h"
-#include "LCDApplication.h"
+#include "Application.h"
 #include "UART_Application.h"
-#include "LCD.h"
+#include "ButtonCore.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -38,7 +36,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+Button_t userButton;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -49,14 +47,6 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-static void HandleTick(void)
-{
-//    UpdateButton();
-	ButtonApp_Update();
-    UpdateLED();
-
-}
 
 /* USER CODE END 0 */
 
@@ -91,22 +81,8 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-
-    /* Start with both LEDs off (IDLE state) */
-    HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_RESET);
-
-    /* Initialize LCD */
-    LCD_Init();
-    LCD_SetCursor(0, 0);
-    LCD_Print("Mode: IDLE      ");
-    LCD_SetCursor(1, 0);
-    LCD_Print("LED: OFF        ");
-
-    /* Initialize UART for communication between boards */
-    UART_AppInit();
-//    ButtonApp_Init();
-
+  ApplicationInit();
+  ButtonCore_Init(&userButton, Button_GPIO_Port, Button_Pin);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -114,9 +90,10 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	//  UpdateDisplay();
 
     /* USER CODE BEGIN 3 */
+	  ApplicationProcess();
+	  ButtonCore_Update(&userButton);
   }
   /* USER CODE END 3 */
 }

@@ -16,6 +16,7 @@
 #include "Application.h"
 #include "UART_Application.h"
 #include "ButtonCore.h"
+#include "LED_Controller.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

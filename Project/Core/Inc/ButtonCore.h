@@ -14,7 +14,7 @@ typedef enum {
 typedef struct {
     uint8_t btn_stable;
     uint8_t btn_prev;
-    uint32_t btn_debounce_time;
+    uint32_t btn_debounce;
     uint32_t btn_press_start;
     uint8_t btn_clicks;
     uint8_t btn_hold;
@@ -25,7 +25,6 @@ typedef struct {
     // Hardware info
     GPIO_TypeDef* GPIO_Port;
     uint16_t GPIO_Pin;
-
 
 } Button_t;
 

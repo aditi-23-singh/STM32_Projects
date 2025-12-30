@@ -1,13 +1,12 @@
 #include "ButtonCore.h"
 
 void ButtonCore_Init(Button_t *btn, GPIO_TypeDef* Port, uint16_t Pin) {
-    btn->GPIO_Port = Port;
-    btn->GPIO_Pin = Pin;
+
 
 
     btn->btn_stable = 0;
     btn->btn_prev = 0;
-    btn->btn_debounce_time = 0;
+    btn->btn_debounce= 0;
     btn->btn_press_start = 0;
     btn->btn_clicks = 0;
     btn->btn_hold = 0;
@@ -16,17 +15,21 @@ void ButtonCore_Init(Button_t *btn, GPIO_TypeDef* Port, uint16_t Pin) {
 }
 
 
-static void Button_Debounce(Button_t *btn, uint8_t raw, uint32_t now) {
-    if (raw != btn->btn_stable) {
-        if (btn->btn_debounce_time == 0) {
-            btn->btn_debounce_time = now;
-        }
-        if (now - btn->btn_debounce_time >= DEBOUNCE_TIME_MS) {
-            btn->btn_stable = raw;
-        }
-    } else {
-        btn->btn_debounce_time = 0;
-    }
+static void Button_Debounce(Button_t *btn,uint8_t raw,uint32_t now)
+{
+	if(raw != btn->btn_stable)
+	{
+		btn->btn_debounce++;
+		if(btn->btn_debounce >= DEBOUNCE_TIME_MS )
+		{
+			btn->btn_stable = raw;
+			btn->btn_debounce = 0;
+		}
+	}
+	else
+	{
+		btn->btn_debounce = 0;
+	}
 }
 
 void ButtonCore_Update(Button_t *btn)
@@ -34,14 +37,13 @@ void ButtonCore_Update(Button_t *btn)
     uint8_t btn_raw = (HAL_GPIO_ReadPin(Button_GPIO_Port, Button_Pin) == GPIO_PIN_SET) ? 1 : 0;
     uint32_t now = HAL_GetTick();
 
-    Button_Debounce(btn, btn_raw, now);
+    Button_Debounce(btn,btn_raw, now);
 
     if (btn->btn_stable && !btn->btn_prev) {
         btn->btn_press_start = now;
         if (!btn->btn_hold)
         {
             btn->btn_clicks++;
-
             if (btn->btn_clicks > 2)
             	btn->btn_clicks = 2;
         }

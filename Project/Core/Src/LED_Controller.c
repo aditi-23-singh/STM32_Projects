@@ -5,6 +5,7 @@ void LED_Controller_Init(LED_Controller_t *ctrl, LED_Mode_t initial_mode)
     ctrl->mode = initial_mode;
     ctrl->blink_timer = 0;
     ctrl->duration_timer = 0;
+
 }
 
 void LED_Controller_SetMode(LED_Controller_t *ctrl, LED_Mode_t mode)
@@ -28,15 +29,15 @@ void LED_Controller_Update(LED_Controller_t *ctrl, GPIO_TypeDef *port, uint16_t 
             ctrl->blink_timer++;
 
             uint32_t period = (ctrl->mode == LED_MODE_FAST_BLINK) ?
-                             FAST_BLINK_PERIOD : SLOW_BLINK_PERIOD;
+                             ctrl->fast_blink_ms : ctrl->slow_blink_ms;
 
             if (ctrl->blink_timer >= period) {
                 ctrl->blink_timer = 0;
                 HAL_GPIO_TogglePin(port, pin);
             }
 
-            // Auto-expiry after 1s
-            if (ctrl->duration_timer >= BLINK_DURATION_MS)
+
+            if (ctrl->duration_timer >= ctrl->blink_duration_ms)
             {
                 ctrl->mode = LED_MODE_IDLE;
                 HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET);

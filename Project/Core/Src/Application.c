@@ -3,7 +3,7 @@
 #include "LEDApplication.h"
 #include "LCDApplication.h"
 #include "UART_Application.h"
-
+#include "LCD_Driver.h"
 extern UARTApplicationTypedefStruct UartData;
 extern ButtonApplicationTypedefStruct ButtonData;
 
@@ -16,7 +16,7 @@ void HandleTick(void)
 void ApplicationInit()
 {
 	LED_Init();
-	LCD_Init();
+	LCD_Driver_Init();
 	UART_AppInit();
 }
 

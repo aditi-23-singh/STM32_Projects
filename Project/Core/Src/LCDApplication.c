@@ -1,7 +1,15 @@
 #include "LCDApplication.h"
 #include "LCD_Driver.h"
 #include <stdio.h>
-#define TEMP_DISPLAY_DURATION_MS 2000
+#define TEMP_DISPLAY_DURATION_MS 1000
+
+typedef enum {
+    LCD_INIT_RESET,
+    LCD_INIT_LABELS,
+    LCD_INIT_READY
+} LCD_InitState_t;
+
+static LCD_InitState_t init_state = LCD_INIT_RESET;
 
 static DisplayMode_t local_mode = DISPLAY_MODE_IDLE;
 static DisplayMode_t local_prev_mode = 255;
@@ -24,6 +32,15 @@ void LCD_UpdateLocalLED(LEDStatus_t status);
 void LCD_UpdateRemoteMode(DisplayMode_t mode);
 void LCD_UpdateRemoteLED(LEDStatus_t status);
 
+
+#define ROW_LOCAL_MODE   0
+#define ROW_LOCAL_LED    1
+#define ROW_REMOTE_MODE  2
+#define ROW_REMOTE_LED   3
+
+
+#define COL_MODE_VALUE   8   // after "L-MODE: "
+#define COL_LED_VALUE    8   // after "L-LED: "
 
 void LCD_UpdateLocalMode(DisplayMode_t mode)
 {
@@ -67,28 +84,37 @@ void LCDApplication_Init(void)
 		LCD_Driver_Init();
 
 	    LCD_Driver_Clear();
-
-	    LCD_Driver_SetCursor(0, 0); LCD_Driver_Print("L-MODE: IDLE   ");
-	    LCD_Driver_SetCursor(1, 0); LCD_Driver_Print("L-LED: OFF       ");
-	    LCD_Driver_SetCursor(2, 0); LCD_Driver_Print("R-MODE: IDLE   ");
-	    LCD_Driver_SetCursor(3, 0); LCD_Driver_Print("R-LED: OFF       ");
+	    init_state = LCD_INIT_RESET;
+	    local_prev_mode = remote_prev_mode = 255;
+	    local_prev_led_status = remote_prev_led_status = 255;
 }
 
 
 void LCDApplication_Process(void)
 {
 
-	if ((local_mode == DISPLAY_MODE_SINGLE || local_mode == DISPLAY_MODE_DOUBLE) &&
+	    if (init_state == LCD_INIT_RESET)
+	    {
+
+	        LCD_Driver_SetCursor(ROW_LOCAL_MODE, 0);  LCD_Driver_Print("L-MODE: ");
+	        LCD_Driver_SetCursor(ROW_LOCAL_LED, 0);   LCD_Driver_Print("L-LED : ");
+	        LCD_Driver_SetCursor(ROW_REMOTE_MODE, 0); LCD_Driver_Print("R-MODE: ");
+	        LCD_Driver_SetCursor(ROW_REMOTE_LED, 0);  LCD_Driver_Print("R-LED : ");
+
+	        init_state = LCD_INIT_READY;
+	        return;
+	    }
+
+	    if ((local_mode == DISPLAY_MODE_SINGLE || local_mode == DISPLAY_MODE_DOUBLE) &&
 	        (HAL_GetTick() - local_last_mode_change >= TEMP_DISPLAY_DURATION_MS))
 	    {
 	        local_mode = DISPLAY_MODE_IDLE;
-	        local_prev_mode = 255;
 	    }
-	if ((remote_mode == DISPLAY_MODE_SINGLE || remote_mode == DISPLAY_MODE_DOUBLE) &&
+
+	    if ((remote_mode == DISPLAY_MODE_SINGLE || remote_mode == DISPLAY_MODE_DOUBLE) &&
 	        (HAL_GetTick() - remote_last_mode_change >= TEMP_DISPLAY_DURATION_MS))
 	    {
 	        remote_mode = DISPLAY_MODE_IDLE;
-	        remote_prev_mode = 255;
 	    }
 
 	    DisplayLocalMode();
@@ -98,70 +124,66 @@ void LCDApplication_Process(void)
 }
 static void DisplayLocalMode(void)
 {
-    if (local_mode != local_prev_mode)
-        {
-            LCD_Driver_SetCursor(0, 0);
+	 if (local_mode == local_prev_mode) return;
 
-            switch (local_mode)
-            {
-                case DISPLAY_MODE_SINGLE: LCD_Driver_Print("L-MODE: SINGLE "); break;
-                case DISPLAY_MODE_DOUBLE: LCD_Driver_Print("L-MODE: DOUBLE "); break;
-                case DISPLAY_MODE_HOLD:   LCD_Driver_Print("L-MODE: HOLD   "); break;
-                default:                  LCD_Driver_Print("L-MODE: IDLE   "); break;
-            }
+	    LCD_Driver_SetCursor(ROW_LOCAL_MODE, COL_MODE_VALUE);
 
-            local_prev_mode = local_mode;
-        }
+	    switch (local_mode)
+	    {
+	        case DISPLAY_MODE_SINGLE: LCD_Driver_Print("SINGLE "); break;
+	        case DISPLAY_MODE_DOUBLE: LCD_Driver_Print("DOUBLE "); break;
+	        case DISPLAY_MODE_HOLD:   LCD_Driver_Print("HOLD   "); break;
+	        default:                  LCD_Driver_Print("IDLE   "); break;
+	    }
+	    local_prev_mode = local_mode;
+
 }
 static void DisplayLocalLED(void)
 {
-    if (local_led_status != local_prev_led_status)
-        {
-            LCD_Driver_SetCursor(1, 0);
-            switch (local_led_status)
-            {
-                case LED_STATUS_HOLD:       LCD_Driver_Print("L-LED: ON (HOLD) "); break;
-                case LED_STATUS_FAST_BLINK: LCD_Driver_Print("L-LED: FAST BLNK "); break;
-                case LED_STATUS_SLOW_BLINK: LCD_Driver_Print("L-LED: SLOW BLNK "); break;
-                default:                    LCD_Driver_Print("L-LED: OFF       "); break;
-            }
-            local_prev_led_status = local_led_status;
-        }
+	 if (local_led_status == local_prev_led_status) return;
+
+	    LCD_Driver_SetCursor(ROW_LOCAL_LED, COL_LED_VALUE);
+
+	    switch (local_led_status)
+	    {
+	        case LED_STATUS_HOLD:       LCD_Driver_Print("ON (HOLD) "); break;
+	        case LED_STATUS_FAST_BLINK: LCD_Driver_Print("FAST BLNK "); break;
+	        case LED_STATUS_SLOW_BLINK: LCD_Driver_Print("SLOW BLNK "); break;
+	        default:                    LCD_Driver_Print("OFF       "); break;
+	    }
+
+	    local_prev_led_status = local_led_status;
 }
 static void DisplayRemoteMode(void)
 {
 
-    if (remote_mode != remote_prev_mode)
-        {
-            LCD_Driver_SetCursor(2, 0);
-            switch (remote_mode)
-            {
-                case DISPLAY_MODE_SINGLE: LCD_Driver_Print("R-MODE: SINGLE "); break;
-                case DISPLAY_MODE_DOUBLE: LCD_Driver_Print("R-MODE: DOUBLE "); break;
-                case DISPLAY_MODE_HOLD:   LCD_Driver_Print("R-MODE: HOLD   "); break;
-                default:                  LCD_Driver_Print("R-MODE: IDLE   "); break;
-            }
-            remote_prev_mode = remote_mode;
-        }
+	if (remote_mode == remote_prev_mode) return;
+
+	    LCD_Driver_SetCursor(ROW_REMOTE_MODE, COL_MODE_VALUE);
+
+	    switch (remote_mode)
+	    {
+	        case DISPLAY_MODE_SINGLE: LCD_Driver_Print("SINGLE "); break;
+	        case DISPLAY_MODE_DOUBLE: LCD_Driver_Print("DOUBLE "); break;
+	        case DISPLAY_MODE_HOLD:   LCD_Driver_Print("HOLD   "); break;
+	        default:                  LCD_Driver_Print("IDLE   "); break;
+	    }
+
+	    remote_prev_mode = remote_mode;
 }
 static void DisplayRemoteLED(void)
 {
-	if (remote_led_status != remote_prev_led_status)
+	 if (remote_led_status == remote_prev_led_status) return;
+
+	    LCD_Driver_SetCursor(ROW_REMOTE_LED, COL_LED_VALUE);
+
+	    switch (remote_led_status)
 	    {
-
-	        LCD_Driver_SetCursor(3, 0);
-
-	        switch (remote_led_status)
-	        {
-	            case LED_STATUS_HOLD:       LCD_Driver_Print("R-LED: ON (HOLD) "); break;
-	            case LED_STATUS_FAST_BLINK: LCD_Driver_Print("R-LED: FAST BLNK "); break;
-	            case LED_STATUS_SLOW_BLINK: LCD_Driver_Print("R-LED: SLOW BLNK "); break;
-	            default:                    LCD_Driver_Print("R-LED: OFF       "); break;
-	        }
-	        remote_prev_led_status = remote_led_status;
+	        case LED_STATUS_HOLD:       LCD_Driver_Print("ON (HOLD) "); break;
+	        case LED_STATUS_FAST_BLINK: LCD_Driver_Print("FAST BLNK "); break;
+	        case LED_STATUS_SLOW_BLINK: LCD_Driver_Print("SLOW BLNK "); break;
+	        default:                    LCD_Driver_Print("OFF       "); break;
 	    }
+
+	    remote_prev_led_status = remote_led_status;
 }
-
-
-
-

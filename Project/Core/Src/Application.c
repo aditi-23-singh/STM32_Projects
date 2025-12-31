@@ -26,10 +26,9 @@ void ApplicationInit()
 
 void ApplicationProcess()
 {
-		// *TODO* Integrate this when LCD is enabled
+
 		LCDApplication_Process();
 
-	//remote board event
 		if (UartData.NewEventReceived)
 	    {
 	        SetRemoteMode(UartData.CurrentEvent);
@@ -38,7 +37,6 @@ void ApplicationProcess()
 
 	        UartData.NewEventReceived = false;
 	    }
-	 	 //Local button event
 	    if (ButtonData.NewEventReceived)
 	    {
 	        UART_SendEvent(ButtonData.CurrentEvent);

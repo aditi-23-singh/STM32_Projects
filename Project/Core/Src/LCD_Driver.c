@@ -7,10 +7,10 @@ void LCD_Driver_Init(void)
 	HAL_Delay(5);
 	LCD_Command(0x32);
 	HAL_Delay(5);
-	LCD_Command(0x28);   /* 4-bit, 2 line, 5x8 dots */
-	LCD_Command(0x0C);   /* Display ON, Cursor OFF */
-	LCD_Command(0x06);   /* Entry mode: increment cursor */
-	LCD_Command(0x01);   /* Clear display */
+	LCD_Command(0x28);
+	LCD_Command(0x0C);
+	LCD_Command(0x06);
+	LCD_Command(0x01);
 	HAL_Delay(5);
 }
 
@@ -24,10 +24,24 @@ void LCD_Driver_Data(uint8_t data){
 void LCD_Driver_SetCursor(uint8_t row, uint8_t col)
 {
     uint8_t addr;
-    if (row == 0)
-        addr = 0x80 + col;
-    else
-        addr = 0xC0 + col;
+    switch(row)
+       {
+           case 0:
+               addr = 0x80 + col;  // Line 1
+               break;
+           case 1:
+               addr = 0xC0 + col;  // Line 2
+               break;
+           case 2:
+               addr = 0x94 + col;  // Line 3
+               break;
+           case 3:
+               addr = 0xD4 + col;  // Line 4
+               break;
+           default:
+               addr = 0x80;
+               break;
+       }
 
     LCD_Command(addr);
 }

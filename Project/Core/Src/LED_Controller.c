@@ -55,4 +55,5 @@ void LED_Controller_Update(LED_Controller_t *ctrl, GPIO_TypeDef *port, uint16_t 
             ctrl->mode = LED_MODE_IDLE;
             break;
     }
+
 }

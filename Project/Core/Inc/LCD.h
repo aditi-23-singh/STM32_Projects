@@ -16,4 +16,4 @@ void LCD_Data(uint8_t data);
 }
 #endif
 
-#endif /* __LCD_H */
+#endif

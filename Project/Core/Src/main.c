@@ -17,6 +17,7 @@
 #include "UART_Application.h"
 #include "ButtonCore.h"
 #include "LED_Controller.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -95,6 +96,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
 	  ApplicationProcess();
 	  ButtonCore_Update(&userButton);
+	  //LCDApplication_Process();
   }
   /* USER CODE END 3 */
 }

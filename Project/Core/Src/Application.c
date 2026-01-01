@@ -29,23 +29,25 @@ void ApplicationProcess()
 
 		LCDApplication_Process();
 
+
 		if (UartData.NewEventReceived)
 	    {
 	        SetRemoteMode(UartData.CurrentEvent);
 
-	        LCD_UpdateRemoteMode((DisplayMode_t)UartData.CurrentEvent);
+	        LCD_SyncRemoteEvent(UartData.CurrentEvent);
 
 	        UartData.NewEventReceived = false;
 	    }
+
 	    if (ButtonData.NewEventReceived)
 	    {
 	        UART_SendEvent(ButtonData.CurrentEvent);
 	        SetLocalMode(ButtonData.CurrentEvent);
 
-	        LCD_UpdateLocalMode((DisplayMode_t)ButtonData.CurrentEvent);
+	        LCD_SyncLocalEvent(ButtonData.CurrentEvent);
 
 	        ButtonData.NewEventReceived = false;
 	    }
-	    LCD_UpdateLocalLED((LEDStatus_t)local_ctrl.mode);
-	    LCD_UpdateRemoteLED((LEDStatus_t)remote_ctrl.mode);
+	    LCD_UpdateLocalStatus(local_ctrl.mode);
+	    LCD_UpdateRemoteStatus(remote_ctrl.mode);
 }

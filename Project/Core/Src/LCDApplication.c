@@ -2,7 +2,7 @@
 #include "LCD_Driver.h"
 #include <stdio.h>
 
-static const uint32_t MESSAGE_EXPIRY_TIME_MS = 1000;
+static const uint32_t MESSAGE_EXPIRY_TIME_MS = 2000;
 static const uint8_t ROW_LOCAL_MODE  = 0;
 static const uint8_t ROW_LOCAL_LED   = 1;
 static const uint8_t ROW_REMOTE_MODE = 2;

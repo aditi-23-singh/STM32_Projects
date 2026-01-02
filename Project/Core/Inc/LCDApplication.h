@@ -27,7 +27,7 @@ void LCDApplication_UpdateRemoteLED(LEDStatus_t status);
 void LCD_UpdateRemoteMode(DisplayMode_t mode);
 void LCD_SyncRemoteEvent(uint8_t event);
 void LCD_SyncLocalEvent(uint8_t event);
-//void LCD_UpdateRemoteLED(LEDStatus_t status);
+void LCD_UpdateRemoteLED(LEDStatus_t status);
 void LCD_UpdateLocalStatus(uint8_t status);
 void LCD_UpdateRemoteStatus(uint8_t status);
 void LCD_UpdateStatusDisplay(void);

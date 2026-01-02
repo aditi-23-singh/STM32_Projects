@@ -5,6 +5,7 @@
 #include "UART_Application.h"
 #include "LCD_Driver.h"
 #include "LED_Controller.h"
+#include "MotorManager.h"
 
 extern UARTApplicationTypedefStruct UartData;
 extern ButtonApplicationTypedefStruct ButtonData;
@@ -22,16 +23,19 @@ void ApplicationInit()
 	LED_Init();
 	LCD_Driver_Init();
 	UART_AppInit();
+	//MotorManager_Init();
 }
 
 void ApplicationProcess()
 {
 
-		LCDApplication_Process();
 
+		LCDApplication_Process();
+//		MotorManager_Update();
 
 		if (UartData.NewEventReceived)
 	    {
+//			MotorManager_HandleEvent(UartData.CurrentEvent);
 	        SetRemoteMode(UartData.CurrentEvent);
 
 	        LCD_SyncRemoteEvent(UartData.CurrentEvent);
@@ -41,6 +45,7 @@ void ApplicationProcess()
 
 	    if (ButtonData.NewEventReceived)
 	    {
+//	    	MotorManager_HandleEvent(ButtonData.CurrentEvent);
 	        UART_SendEvent(ButtonData.CurrentEvent);
 	        SetLocalMode(ButtonData.CurrentEvent);
 

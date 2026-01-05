@@ -7,7 +7,8 @@
 
 
 uint8_t crc=0;
-uint8_t rxBuffer[8]={0};
+uint8_t rxBuffer[12]={0};
+uint8_t txBuffer[8];
 static uint8_t calcCRC(uint8_t *datagram, uint8_t len) {
     crc = 0;
     for (int i = 0; i < len; i++) {
@@ -29,7 +30,7 @@ static void clearRXBuffer(TMC2208_t *driver, uint16_t bytesToClear) {
     // We must read them out to clear the ORE (Overrun) or buffer.
     uint8_t dummy[12];
     if(bytesToClear > 12) bytesToClear = 12; // Safety cap
-    HAL_UART_Receive(driver->uartHandle, dummy, bytesToClear, 10);
+    HAL_UART_Receive(driver->uartHandle,  dummy,bytesToClear,10);
 }
 
 // --- Public Implementation ---
@@ -41,7 +42,7 @@ void TMC_Init(TMC2208_t *driver, UART_HandleTypeDef *uart_handle, uint8_t slave_
 }
 
 void TMC_WriteRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t data) {
-    uint8_t txBuffer[8];
+
 
     txBuffer[0] = TMC_SYNC_BYTE;
     txBuffer[1] = driver->slaveAddress;
@@ -62,7 +63,7 @@ void TMC_WriteRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t data) {
 }
 
 bool TMC_ReadRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t *value) {
-    uint8_t txBuffer[4];
+    uint8_t txBuffer[8];
     // We only need 8 bytes now, because we will "flush" the 4 echo bytes by clearing the error
 
 
@@ -73,7 +74,14 @@ bool TMC_ReadRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t *value) {
 
     // 1. Send the request (Blocking)
     // During this time, the echo arrives and causes an ORE (Overrun) error.
-    HAL_UART_Transmit(driver->uartHandle, txBuffer, 4, 100);
+
+    HAL_UART_AbortReceive_IT(driver->uartHandle);
+
+    if (HAL_UART_Receive_IT(driver->uartHandle, rxBuffer, 12) != HAL_OK) {
+          return false;
+    }
+
+	HAL_UART_Transmit(driver->uartHandle, txBuffer, 4, 100);
 
     // 2. CRITICAL FIX: Clear the Overrun Flag (ORE)
     // This acknowledges the "lost" echo bytes and unlocks the UART for the real reply.
@@ -81,17 +89,16 @@ bool TMC_ReadRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t *value) {
 
     // 3. Receive only the Response (8 Bytes)
     // We expect the TMC2208 to reply now.
-    if (HAL_UART_Receive(driver->uartHandle, rxBuffer, 8, 100) != HAL_OK) {
-        return false; // Timeout or Error
-    }
-    if (rxBuffer[0] != 0x05) {
+   // Timeout or Error
+
+    if (rxBuffer[4] != 0x05) {
             // If we read 0x00, the wire is likely broken/grounded.
             return false;
-        }
+    }
 
     // 4. Verify CRC (The reply is now at index 0, not 4)
-    uint8_t calculatedCRC = calcCRC(rxBuffer, 7);
-    if (calculatedCRC != rxBuffer[7]) {
+    uint8_t calculatedCRC = calcCRC(&rxBuffer[4],7);
+    if (calculatedCRC != rxBuffer[11]) {
         driver->isCRCError = true;
         return false;
     }
@@ -99,7 +106,7 @@ bool TMC_ReadRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t *value) {
     driver->isCRCError = false;
 
     // 5. Extract Data
-    *value = (rxBuffer[3] << 24) | (rxBuffer[4] << 16) | (rxBuffer[5] << 8) | rxBuffer[6];
+    *value = (rxBuffer[7] << 24) | (rxBuffer[8] << 16) | (rxBuffer[9] << 8) | rxBuffer[10];
 
     return true;
 }

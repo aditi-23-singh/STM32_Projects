@@ -129,7 +129,7 @@ int main(void)
 	        sent_value = 0x00061F0A; // Example: IRUN=31, IHOLD=10
 	              TMC_WriteRegister(&motor1, TMC2208_IHOLD_IRUN, sent_value);
 
-	             // HAL_Delay(100); // Wait a tiny bit for the chip to process
+	             HAL_Delay(100); // Wait a tiny bit for the chip to process
 
 	              // Read it back
 	              if (TMC_ReadRegister(&motor1, TMC2208_IHOLD_IRUN, &read_back_value)) {
@@ -139,7 +139,7 @@ int main(void)
 	                  }
 	              }
 
-	             // HAL_Delay(500); // Wait half a second
+	             HAL_Delay(500); // Wait half a second
 	              sent_value = 0x00060505; // Example: IRUN=5, IHOLD=5
 	                    TMC_WriteRegister(&motor1, TMC2208_IHOLD_IRUN, sent_value);
 
@@ -152,8 +152,8 @@ int main(void)
 	                            match_count++; // TX and RX both worked!
 	                        }
 	                    }
-
-	                    //HAL_Delay(500);
+//
+                    HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

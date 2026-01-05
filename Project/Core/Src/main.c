@@ -41,10 +41,18 @@
 
 /* USER CODE BEGIN PV */
 Button_t userButton;
-uint32_t ifcnt = 0;
-uint32_t ioin ;
-uint32_t ihold_irun;
-uint8_t status;
+uint32_t tmc_status_value = 0;
+uint32_t ioin;
+uint32_t gconf;
+TMC2208_t motor1;
+uint32_t gconf_val = 0;        // Holds the data read from the chip
+uint32_t success_count = 0;    // Increments every time we get a valid reply
+uint32_t error_count = 0;      // Increments every time the read fails
+uint8_t  connection_state = 0; // 1 = Connected (OK), 0 = Disconnected (Fail)
+uint32_t sent_value = 0;       // What we WROTE to the chip
+  uint32_t read_back_value = 0;  // What we READ back from the chip
+  uint32_t match_count = 0;      // Increases if TX and RX match perfectly
+extern UART_HandleTypeDef huart2;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,11 +101,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   ApplicationInit();
   ButtonCore_Init(&userButton, Button_GPIO_Port, Button_Pin);
-
-  TMC2208_Init(&huart2);
-  HAL_Delay(500);
-
-
+  TMC_Init(&motor1, &huart2, 0x00);
 
   /* USER CODE END 2 */
 
@@ -105,11 +109,54 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  // Attempt to read the GCONF register
+	        if (TMC_ReadRegister(&motor1, TMC2208_GCONF, &gconf_val)) {
+
+	            // SUCCESS logic
+	            connection_state = 1;  // Status: OK
+	            success_count++;       // Count up
+
+	            // Note: 'gconf_val' is automatically updated by the function above
+
+	        } else {
+	            // FAILURE logic
+	            connection_state = 0;  // Status: BROKEN
+	            error_count++;         // Count errors
+
+	            // Tip: If error_count goes up but motor1.isCRCError is 0,
+	            // it means you have a Timeout (No cables connected / Power off).
+	        }
+	        sent_value = 0x00061F0A; // Example: IRUN=31, IHOLD=10
+	              TMC_WriteRegister(&motor1, TMC2208_IHOLD_IRUN, sent_value);
+
+	             // HAL_Delay(100); // Wait a tiny bit for the chip to process
+
+	              // Read it back
+	              if (TMC_ReadRegister(&motor1, TMC2208_IHOLD_IRUN, &read_back_value)) {
+	                  // Compare!
+	                  if (read_back_value == sent_value) {
+	                      match_count++; // TX and RX both worked!
+	                  }
+	              }
+
+	             // HAL_Delay(500); // Wait half a second
+	              sent_value = 0x00060505; // Example: IRUN=5, IHOLD=5
+	                    TMC_WriteRegister(&motor1, TMC2208_IHOLD_IRUN, sent_value);
+
+	                   // HAL_Delay(100);
+
+	                    // Read it back
+	                    if (TMC_ReadRegister(&motor1, TMC2208_IHOLD_IRUN, &read_back_value)) {
+	                        // Compare!
+	                        if (read_back_value == sent_value) {
+	                            match_count++; // TX and RX both worked!
+	                        }
+	                    }
+
+	                    //HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//	  status =TMC2208_ReadRegister(0x06, &ioin);
-	  status=TMC2208_ReadRegister(0x10, &ihold_irun);
 
 
 

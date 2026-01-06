@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// --- Register Addresses (Common) ---
 #define TMC2208_GCONF      0x00
 #define TMC2208_GSTAT      0x01
 #define TMC2208_IFCNT      0x02
@@ -23,8 +22,8 @@
 
 
 typedef struct {
-    UART_HandleTypeDef *uartHandle; // Pointer to the HAL UART handle
-    uint8_t slaveAddress;           // TMC2208 Slave Address (usually 0-3)
+    UART_HandleTypeDef *uartHandle;
+    uint8_t slaveAddress;
     bool isCRCError;                // Status flag for last transaction
 } TMC2208_t;
 

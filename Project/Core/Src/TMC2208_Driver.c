@@ -72,7 +72,7 @@ bool TMC_ReadRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t *value) {
 
 
     HAL_UART_AbortReceive_IT(driver->uartHandle);
-
+    __HAL_UART_CLEAR_FLAG(driver->uartHandle, UART_CLEAR_OREF);
     if (HAL_UART_Receive_IT(driver->uartHandle, rxBuffer, 12) != HAL_OK) {
           return false;
     }

@@ -117,18 +117,18 @@ void TMC2208_InitGCONF_InternalRsense(TMC2208_GCONF_t *gconf) {
     gconf->raw_value = buildGCONF(gconf);
 }
 
-bool TMC2208_ModifyGCONFBit(TMC2208_t *driver, uint32_t bit_mask, bool value) {
-    if (driver == NULL) return false;
-    uint32_t current_value = 0;
-    if (!TMC_ReadRegister(driver, TMC2208_GCONF, &current_value)) return false;
-    if (value) {
-        current_value |= bit_mask;
-    } else {
-        current_value &= ~bit_mask;
-    }
-    TMC_WriteRegister(driver, TMC2208_GCONF, current_value);
-    return true;
-}
+//bool TMC2208_ModifyGCONFBit(TMC2208_t *driver, uint32_t bit_mask, bool value) {
+//    if (driver == NULL) return false;
+//    uint32_t current_value = 0;
+//    if (!TMC_ReadRegister(driver, TMC2208_GCONF, &current_value)) return false;
+//    if (value) {
+//        current_value |= bit_mask;
+//    } else {
+//        current_value &= ~bit_mask;
+//    }
+//    TMC_WriteRegister(driver, TMC2208_GCONF, current_value);
+//    return true;
+//}
 
 
 
@@ -178,28 +178,30 @@ static uint32_t buildIHOLD_IRUN(const TMC2208_IHOLD_IRUN_t *ihold_irun) {
     return value;
 }
 
-bool TMC2208_ReadIHOLD_IRUN_Raw(TMC2208_t *driver, uint32_t *value) {
-    if (driver == NULL || value == NULL) return false;
-    return TMC_ReadRegister(driver, TMC2208_IHOLD_IRUN, value);
-}
-
-bool TMC2208_ReadIHOLD_IRUN(TMC2208_t *driver, TMC2208_IHOLD_IRUN_t *ihold_irun) {
-    if (driver == NULL || ihold_irun == NULL) return false;
-    uint32_t raw_value = 0;
-    if (!TMC_ReadRegister(driver, TMC2208_IHOLD_IRUN, &raw_value)) return false;
-    parseIHOLD_IRUN(raw_value, ihold_irun);
-    return true;
-}
+//bool TMC2208_ReadIHOLD_IRUN_Raw(TMC2208_t *driver, uint32_t *value) {
+//    if (driver == NULL || value == NULL) return false;
+//    return TMC_ReadRegister(driver, TMC2208_IHOLD_IRUN, value);
+//}
+//
+//bool TMC2208_ReadIHOLD_IRUN(TMC2208_t *driver, TMC2208_IHOLD_IRUN_t *ihold_irun) {
+//    if (driver == NULL || ihold_irun == NULL) return false;
+//    uint32_t raw_value = 0;
+//    if (!TMC_ReadRegister(driver, TMC2208_IHOLD_IRUN, &raw_value)) return false;
+//    parseIHOLD_IRUN(raw_value, ihold_irun);
+//    return true;
+//}
 
 void TMC2208_WriteIHOLD_IRUN_Raw(TMC2208_t *driver, uint32_t value) {
     if (driver == NULL) return;
     TMC_WriteRegister(driver, TMC2208_IHOLD_IRUN, value);
+    driver->shadow_ihold_irun = value;
 }
 
 void TMC2208_WriteIHOLD_IRUN(TMC2208_t *driver, const TMC2208_IHOLD_IRUN_t *ihold_irun) {
     if (driver == NULL || ihold_irun == NULL) return;
     uint32_t value = buildIHOLD_IRUN(ihold_irun);
     TMC_WriteRegister(driver, TMC2208_IHOLD_IRUN , value);
+    driver->shadow_ihold_irun = value;
 }
 
 void TMC2208_SetCurrent(TMC2208_t *driver, uint8_t irun, uint8_t ihold, uint8_t iholddelay) {
@@ -214,7 +216,8 @@ void TMC2208_SetCurrent(TMC2208_t *driver, uint8_t irun, uint8_t ihold, uint8_t 
 void TMC2208_SetRunCurrent(TMC2208_t *driver, uint8_t irun) {
     if (driver == NULL) return;
     TMC2208_IHOLD_IRUN_t ihold_irun;
-    if (!TMC2208_ReadIHOLD_IRUN(driver, &ihold_irun)) return;
+    parseIHOLD_IRUN(driver->shadow_ihold_irun, &ihold_irun);
+//    if (!TMC2208_ReadIHOLD_IRUN(driver, &ihold_irun)) return;
     ihold_irun.irun = irun & 0x1F;
     TMC2208_WriteIHOLD_IRUN(driver, &ihold_irun);
 }
@@ -222,7 +225,8 @@ void TMC2208_SetRunCurrent(TMC2208_t *driver, uint8_t irun) {
 void TMC2208_SetHoldCurrent(TMC2208_t *driver, uint8_t ihold) {
     if (driver == NULL) return;
     TMC2208_IHOLD_IRUN_t ihold_irun;
-    if (!TMC2208_ReadIHOLD_IRUN(driver, &ihold_irun)) return;
+    parseIHOLD_IRUN(driver->shadow_ihold_irun, &ihold_irun);
+//    if (!TMC2208_ReadIHOLD_IRUN(driver, &ihold_irun)) return;
     ihold_irun.ihold = ihold & 0x1F;
     TMC2208_WriteIHOLD_IRUN(driver, &ihold_irun);
 }
@@ -230,7 +234,8 @@ void TMC2208_SetHoldCurrent(TMC2208_t *driver, uint8_t ihold) {
 void TMC2208_SetHoldDelay(TMC2208_t *driver, uint8_t iholddelay) {
     if (driver == NULL) return;
     TMC2208_IHOLD_IRUN_t ihold_irun;
-    if (!TMC2208_ReadIHOLD_IRUN(driver, &ihold_irun)) return;
+    parseIHOLD_IRUN(driver->shadow_ihold_irun, &ihold_irun);
+//    if (!TMC2208_ReadIHOLD_IRUN(driver, &ihold_irun)) return;
     ihold_irun.iholddelay = iholddelay & 0x0F;
     TMC2208_WriteIHOLD_IRUN(driver, &ihold_irun);
 }

@@ -53,6 +53,8 @@ void TMC_WriteRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t data) {
     txBuffer[7] = calcCRC(txBuffer, 7);
 
 
+
+
     HAL_UART_Transmit(driver->uartHandle, txBuffer, 8, 100);
 
 

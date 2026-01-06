@@ -24,7 +24,8 @@
 typedef struct {
     UART_HandleTypeDef *uartHandle;
     uint8_t slaveAddress;
-    bool isCRCError;                // Status flag for last transaction
+    bool isCRCError;
+    uint32_t shadow_ihold_irun;
 } TMC2208_t;
 
 

@@ -182,9 +182,6 @@ static inline uint8_t TMC2208_GetMicrostepMode(const TMC2208_IOIN_t *ioin) {
     return (ioin->ms2 << 1) | ioin->ms1;
 }
 
-bool TMC2208_ReadIHOLD_IRUN(TMC2208_t *driver, TMC2208_IHOLD_IRUN_t *ihold_irun);
-bool TMC2208_ReadIHOLD_IRUN_Raw(TMC2208_t *driver, uint32_t *value);
-
 
 void TMC2208_WriteIHOLD_IRUN(TMC2208_t *driver, const TMC2208_IHOLD_IRUN_t *ihold_irun);
 void TMC2208_WriteIHOLD_IRUN_Raw(TMC2208_t *driver, uint32_t value);

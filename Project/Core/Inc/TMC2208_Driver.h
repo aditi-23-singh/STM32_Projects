@@ -25,7 +25,11 @@ typedef struct {
     UART_HandleTypeDef *uartHandle;
     uint8_t slaveAddress;
     bool isCRCError;
-    uint32_t shadow_ihold_irun;
+
+        uint32_t shadow_gconf;
+        uint32_t shadow_ioin;
+        uint32_t shadow_ihold_irun;
+
 } TMC2208_t;
 
 

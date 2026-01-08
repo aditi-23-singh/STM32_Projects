@@ -123,15 +123,26 @@ void TMC2208_SetPDNDisable(TMC2208_t *driver, bool disable);
 void TMC2208_SetMstepRegSelect(TMC2208_t *driver, bool use_register);
 void TMC2208_SetMultistepFilt(TMC2208_t *driver, bool enable);
 void TMC2208_SetTestMode(TMC2208_t *driver, bool enable);
-
-void TMC2208_InitGCONF(TMC2208_GCONF_t *gconf);
-void TMC2208_InitGCONF_InternalRsense(TMC2208_GCONF_t *gconf);
+void TMC2208_InitGCONF(TMC2208_t *driver, TMC2208_GCONF_t *gconf);
+void TMC2208_InitGCONF_InternalRsense(TMC2208_t *driver,TMC2208_GCONF_t *gconf);
 bool TMC2208_ModifyGCONFBit(TMC2208_t *driver, uint32_t bit_mask, bool value);
 
+// Individual GCONF flag getters (read from shadow)
+bool TMC2208_GetIScaleAnalog(TMC2208_t *driver);
+bool TMC2208_GetInternalRsense(TMC2208_t *driver);
+bool TMC2208_GetSpreadCycle(TMC2208_t *driver);
+bool TMC2208_GetShaft(TMC2208_t *driver);
+bool TMC2208_GetIndexOTPW(TMC2208_t *driver);
+bool TMC2208_GetIndexStep(TMC2208_t *driver);
+bool TMC2208_GetPDNDisable(TMC2208_t *driver);
+bool TMC2208_GetMstepRegSelect(TMC2208_t *driver);
+bool TMC2208_GetMultistepFilt(TMC2208_t *driver);
+bool TMC2208_GetTestMode(TMC2208_t *driver);
 
 /* Read Functions */
 bool TMC2208_ReadIOIN(TMC2208_t *driver, TMC2208_IOIN_t *ioin);
 bool TMC2208_ReadIOIN_Raw(TMC2208_t *driver, uint32_t *value);
+bool TMC2208_UpdateIOIN(TMC2208_t *driver);
 
 /* Getter Functions */
 static inline bool TMC2208_GetENN(const TMC2208_IOIN_t *ioin) {
@@ -183,15 +194,23 @@ static inline uint8_t TMC2208_GetMicrostepMode(const TMC2208_IOIN_t *ioin) {
 }
 
 
+
+bool TMC2208_ReadIHOLD_IRUN(TMC2208_t *driver, TMC2208_IHOLD_IRUN_t *ihold_irun);
+bool TMC2208_ReadIHOLD_IRUN_Raw(TMC2208_t *driver, uint32_t *value);
 void TMC2208_WriteIHOLD_IRUN(TMC2208_t *driver, const TMC2208_IHOLD_IRUN_t *ihold_irun);
 void TMC2208_WriteIHOLD_IRUN_Raw(TMC2208_t *driver, uint32_t value);
-
+void parseIHOLD_IRUN(uint32_t raw_value, TMC2208_IHOLD_IRUN_t *ihold_irun);
 void TMC2208_SetCurrent(TMC2208_t *driver, uint8_t irun, uint8_t ihold, uint8_t iholddelay);
 void TMC2208_SetRunCurrent(TMC2208_t *driver, uint8_t irun);
 void TMC2208_SetHoldCurrent(TMC2208_t *driver, uint8_t ihold);
 void TMC2208_SetHoldDelay(TMC2208_t *driver, uint8_t iholddelay);
-
 void TMC2208_InitIHOLD_IRUN(TMC2208_IHOLD_IRUN_t *ihold_irun, uint8_t irun, uint8_t ihold, uint8_t iholddelay);
+
+uint8_t TMC2208_GetIHOLD(TMC2208_t *driver);
+uint8_t TMC2208_GetIRUN(TMC2208_t *driver);
+uint8_t TMC2208_GetIHOLDDELAY(TMC2208_t *driver);
+uint16_t TMC2208_GetIHOLD_mA(TMC2208_t *driver, uint16_t rsense_milliohm);
+uint16_t TMC2208_GetIRUN_mA(TMC2208_t *driver, uint16_t rsense_milliohm);
 
 uint16_t TMC2208_CurrentToRMS(uint8_t cs_value, uint16_t rsense_milliohm);
 uint8_t TMC2208_RMSToCurrent(uint16_t current_ma, uint16_t rsense_milliohm);

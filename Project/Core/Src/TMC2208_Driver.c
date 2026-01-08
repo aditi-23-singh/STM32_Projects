@@ -38,6 +38,9 @@ void TMC_Init(TMC2208_t *driver, UART_HandleTypeDef *uart_handle, uint8_t slave_
     driver->uartHandle = uart_handle;
     driver->slaveAddress = slave_addr;
     driver->isCRCError = false;
+    driver->shadow_gconf = 0;
+       driver->shadow_ihold_irun = 0;
+       driver->shadow_ioin = 0;
 }
 
 void TMC_WriteRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t data) {
@@ -52,9 +55,6 @@ void TMC_WriteRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t data) {
     txBuffer[6] = data & 0xFF;
     txBuffer[7] = calcCRC(txBuffer, 7);
 
-
-
-
     HAL_UART_Transmit(driver->uartHandle, txBuffer, 8, 100);
 
 
@@ -65,16 +65,14 @@ bool TMC_ReadRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t *value) {
     uint8_t txBuffer[8];
 
 
-
-    txBuffer[0] = 0x05; // Sync
+    txBuffer[0] = 0x05;
     txBuffer[1] = driver->slaveAddress;
     txBuffer[2] = reg_addr;
     txBuffer[3] = calcCRC(txBuffer, 3);
 
-
-
     HAL_UART_AbortReceive_IT(driver->uartHandle);
     __HAL_UART_CLEAR_FLAG(driver->uartHandle, UART_CLEAR_OREF);
+
     if (HAL_UART_Receive_IT(driver->uartHandle, rxBuffer, 12) != HAL_OK) {
           return false;
     }

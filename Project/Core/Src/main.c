@@ -42,12 +42,12 @@
 
 /* USER CODE BEGIN PV */
 Button_t userButton;
-uint32_t sent_value = 0;
 uint32_t read_back_value = 0;
 uint32_t match_count = 0;
-TMC2208_t g_tmc2208_driver;
-
+uint32_t sent_value=0;
 extern UART_HandleTypeDef huart2;
+TMC2208_t motor1;
+
 
 /* USER CODE END PV */
 
@@ -59,9 +59,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void TMC2208_Debug_Init(void) {
-    TMC_Init(&g_tmc2208_driver, &huart2, 0x00);
-}
+
 
 
 
@@ -74,7 +72,7 @@ void TMC2208_Debug_Init(void) {
 int main(void)
 {
 
-  /* USER CODE BEGIN 1 */
+	/* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
 
@@ -95,56 +93,38 @@ int main(void)
 
   /* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_USART1_UART_Init();
-  MX_USART2_UART_Init();
-  /* USER CODE BEGIN 2 */
-  TMC2208_Debug_Init();
+  /* USER CODE BEGIN 2 */;
+
 
  // ApplicationInit();
  // ButtonCore_Init(&userButton, Button_GPIO_Port, Button_Pin);
 
 
+//
+//  TMC2208_WriteGCONF_Raw(&motor1, 0x00000000);
 
-
-
+//  TMC2208_ModifyGCONFBit(&motor1, TMC2208_GCONF_MULTISTEP_FILT_MASK, true);
+//  TMC2208_ModifyGCONFBit(&motor1, TMC2208_GCONF_EN_SPREADCYCLE_MASK , false);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-//	        sent_value = 0x00061F0A;
-//	              TMC_WriteRegister(&g_tmc2208_driver, TMC2208_IHOLD_IRUN, sent_value);
-////
-//	             HAL_Delay(100);
-////
-////
-//	              if (TMC_ReadRegister(&g_tmc2208_driver, TMC2208_IHOLD_IRUN, &read_back_value)) {
-////
-//	                  if (read_back_value == sent_value) {
-//	                      match_count++;
-//	                  }
-//	              }
 
-//
-//	             HAL_Delay(500);
-//	              sent_value = 0x00060505;
-//	                    TMC_WriteRegister(&g_driver, TMC2208_IHOLD_IRUN, sent_value);
-//
-//	                    HAL_Delay(100);
-//
-//
-//	                    if (TMC_ReadRegister(&g_driver, TMC2208_IHOLD_IRUN, &read_back_value)) {
-//
-//	                        if (read_back_value == sent_value) {
-//	                            match_count++;
-//	                        }
-//	                    }
-//                    HAL_Delay(500);
+	  sent_value = 0x00061F0A;
+	 	              TMC_WriteRegister(&motor1, TMC2208_IHOLD_IRUN, sent_value);
+
+	 	             HAL_Delay(100);
 
 
+	 	              if (TMC_ReadRegister(&motor1, TMC2208_IHOLD_IRUN, &read_back_value)) {
+
+	 	                  if (read_back_value == sent_value) {
+	 	                      match_count++;
+	 	                  }
+	 	              }
+	 	              HAL_Delay(50);
 
     /* USER CODE END WHILE */
 
@@ -218,6 +198,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     {
         UART_OnByteReceived();
     }
+
+
+
+
 }
 /* USER CODE END 4 */
 

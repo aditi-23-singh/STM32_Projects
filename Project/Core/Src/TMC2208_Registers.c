@@ -18,7 +18,7 @@ static void parseGCONF(uint32_t raw_value, TMC2208_GCONF_t *gconf) {
 static uint32_t buildGCONF(const TMC2208_GCONF_t *gconf) {
     uint32_t value = 0;
     if (gconf->i_scale_analog)   value |= TMC2208_GCONF_I_SCALE_ANALOG_MASK;
-    if (gconf->internal_rsense)  value |= TMC2208_GCONF_INTERNAL_RSENSE_MASK;
+    if (gconf->internal_rsense)  value |= WTMC2208_GCONF_INTERNAL_RSENSE_MASK;
     if (gconf->en_spreadcycle)   value |= TMC2208_GCONF_EN_SPREADCYCLE_MASK;
     if (gconf->shaft)            value |= TMC2208_GCONF_SHAFT_MASK;
     if (gconf->index_otpw)       value |= TMC2208_GCONF_INDEX_OTPW_MASK;

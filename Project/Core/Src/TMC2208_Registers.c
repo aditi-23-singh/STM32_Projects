@@ -1,6 +1,5 @@
 #include "TMC2208_Registers.h"
 
-
 static uint32_t buildGCONF(const TMC2208_GCONF_t *gconf) {
     uint32_t value = 0;
     if (gconf->i_scale_analog)   value |= TMC2208_GCONF_I_SCALE_ANALOG_MASK;
@@ -108,7 +107,6 @@ bool TMC2208_ModifyGCONFBit(TMC2208_t *driver, uint32_t bit_mask, bool value) {
        else
            new_value &= ~bit_mask;
 
-       /* Avoid unnecessary write */
        if (new_value == current_value)
            return true;
 
@@ -192,8 +190,6 @@ bool TMC2208_ReadIOIN(TMC2208_t *driver, TMC2208_IOIN_t *ioin) {
     return true;
 }
 
-
-
  void parseIHOLD_IRUN(uint32_t raw_value, TMC2208_IHOLD_IRUN_t *ihold_irun) {
     ihold_irun->raw_value = raw_value;
     ihold_irun->ihold = (uint8_t)((raw_value & TMC2208_IHOLD_MASK) >> TMC2208_IHOLD_SHIFT);
@@ -201,19 +197,12 @@ bool TMC2208_ReadIOIN(TMC2208_t *driver, TMC2208_IOIN_t *ioin) {
     ihold_irun->iholddelay = (uint8_t)((raw_value & TMC2208_IHOLDDELAY_MASK) >> TMC2208_IHOLDDELAY_SHIFT);
 }
 
-
 static uint32_t buildIHOLD_IRUN(const TMC2208_IHOLD_IRUN_t *ihold_irun) {
     uint32_t value = 0;
     value |= ((uint32_t)(ihold_irun->ihold & 0x1F) << TMC2208_IHOLD_SHIFT);
     value |= ((uint32_t)(ihold_irun->irun & 0x1F) << TMC2208_IRUN_SHIFT);
     value |= ((uint32_t)(ihold_irun->iholddelay & 0x0F) << TMC2208_IHOLDDELAY_SHIFT);
     return value;
-}
-
-bool TMC2208_ReadIHOLD_IRUN_Raw(TMC2208_t *driver, uint32_t *value) {
-    if (driver == NULL || value == NULL) return false;
-    *value = driver->shadow_ihold_irun;
-    return /*TMC_ReadRegister(driver, TMC2208_IHOLD_IRUN, value);*/ true;
 }
 
 bool TMC2208_ReadIHOLD_IRUN(TMC2208_t *driver, TMC2208_IHOLD_IRUN_t *ihold_irun) {
@@ -257,7 +246,7 @@ void TMC2208_SetHoldCurrent(TMC2208_t *driver, uint8_t ihold) {
     parseIHOLD_IRUN(driver->shadow_ihold_irun, &ihold_irun);
     if (!TMC2208_ReadIHOLD_IRUN(driver, &ihold_irun)) return;
     ihold_irun.ihold = ihold & 0x1F;
-//    driver->shadow_ihold_irun = buildIHOLD_IRUN(&ihold_irun);
+    driver->shadow_ihold_irun = buildIHOLD_IRUN(&ihold_irun);
     TMC2208_WriteIHOLD_IRUN(driver, &ihold_irun);
 }
 
@@ -298,7 +287,6 @@ uint16_t TMC2208_GetIRUN_mA(TMC2208_t *driver, uint16_t rsense_milliohm) {
     return TMC2208_CurrentToRMS(irun, rsense_milliohm);
 }
 
-/* Current conversion helpers */
 uint16_t TMC2208_CurrentToRMS(uint8_t cs_value, uint16_t rsense_milliohm) {
 
     if (rsense_milliohm == 110) {
@@ -313,7 +301,7 @@ uint16_t TMC2208_CurrentToRMS(uint8_t cs_value, uint16_t rsense_milliohm) {
 }
 
 uint8_t TMC2208_RMSToCurrent(uint16_t current_ma, uint16_t rsense_milliohm) {
-    /* Reverse calculation */
+
     if (rsense_milliohm == 110) {
         uint8_t cs = (uint8_t)(current_ma / 35);
         if (cs > 0) cs--;

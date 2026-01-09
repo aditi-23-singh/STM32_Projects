@@ -40,7 +40,7 @@ static void clearRXBuffer(TMC2208_t *driver, uint16_t bytesToClear) {
     uint8_t dummy[12];
     if(bytesToClear > 12) bytesToClear = 12;
     HAL_UART_Receive(driver->uartHandle,  dummy,bytesToClear,10);
-   // memset(rxBuffer,0,sizeof(rxBuffer));
+
 }
 
 
@@ -77,17 +77,9 @@ bool TMC2208_SyncUART(TMC2208_t *driver)
         return false;
 
     uint32_t dummy;
-
-    /* Flush any garbage / echo */
     UART_FlushRx(driver->uartHandle);
-
-    /* Dummy read to wake up TMC2208 UART */
     TMC_ReadRegister(driver, TMC2208_GCONF, &dummy);
-
-    /* Small settling delay */
     HAL_Delay(2);
-
-    /* Flush again to remove dummy response */
     UART_FlushRx(driver->uartHandle);
 
     return true;
@@ -102,8 +94,6 @@ bool TMC_ReadRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t *value) {
     txBuffer[2] = reg_addr;
     txBuffer[3] = calcCRC(txBuffer, 3);
 
-
-   // clearRxBuffer(driver);
     HAL_UART_AbortReceive_IT(driver->uartHandle);
     __HAL_UART_CLEAR_FLAG(driver->uartHandle, UART_CLEAR_OREF);
 
@@ -112,17 +102,11 @@ bool TMC_ReadRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t *value) {
     }
 
 	HAL_UART_Transmit(driver->uartHandle, txBuffer, 4, 100);
-
-
     __HAL_UART_CLEAR_FLAG(driver->uartHandle, UART_CLEAR_OREF);
-
-
     if (rxBuffer[4] != 0x05) {
 
             return false;
     }
-
-
     uint8_t calculatedCRC = calcCRC(&rxBuffer[4],7);
     if (calculatedCRC != rxBuffer[11]) {
         driver->isCRCError = true;
@@ -130,8 +114,6 @@ bool TMC_ReadRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t *value) {
     }
 
     driver->isCRCError = false;
-
-
     *value = (rxBuffer[7] << 24) | (rxBuffer[8] << 16) | (rxBuffer[9] << 8) | rxBuffer[10];
 
     return true;

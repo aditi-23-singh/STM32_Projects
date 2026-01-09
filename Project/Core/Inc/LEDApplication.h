@@ -6,7 +6,6 @@
 
 #define DELAY_COUNT 4
 
-/* Function prototypes */
 void UpdateLED(void);
 void SetRemoteMode(EVENT_CODES_ENUM event);
 void SetLocalMode(EVENT_CODES_ENUM event);

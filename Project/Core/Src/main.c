@@ -42,16 +42,16 @@
 
 /* USER CODE BEGIN PV */
 Button_t userButton;
-uint32_t read_back_value = 0;
-uint32_t match_count = 0;
-uint32_t sent_value=0;
 extern UART_HandleTypeDef huart2;
 volatile bool tmc_rx_done = false;
 TMC2208_t motor1;
 uint32_t gconf_read_value = 0;
+uint32_t gconf_read_value1 = 0;
 uint32_t gconf_write_value = 0;
 bool read_success = false;
 bool write_success = false;
+bool read1_success = false;
+bool write1_success = false;
 bool debug=true;
 TMC2208_GCONF_t gconf;
 /* USER CODE END PV */
@@ -66,8 +66,6 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 
 
-
-
 /* USER CODE END 0 */
 
 /**
@@ -77,7 +75,7 @@ void SystemClock_Config(void);
 int main(void)
 {
 
-	/* USER CODE BEGIN 1 */
+/* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
 
@@ -111,9 +109,14 @@ int main(void)
   	{
 
   		  TMC2208_SyncUART(&motor1);
-  		  gconf_write_value = 0x00000001;
+  		  gconf_write_value = 0x00000000;
   		  TMC_WriteRegister(&motor1, TMC2208_GCONF, gconf_write_value);
   		  read_success = TMC_ReadRegister(&motor1, TMC2208_GCONF, &gconf_read_value);
+  		  write1_success = TMC2208_ModifyGCONFBit(&motor1, TMC2208_GCONF_INTERNAL_RSENSE_MASK, true);
+  		  HAL_Delay(10);
+  		  read1_success =  TMC2208_GetInternalRsense(&motor1);
+  		  HAL_Delay(10);
+
   	}
 
 
@@ -198,6 +201,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	if (huart == motor1.uartHandle)
 		tmc_rx_done = true;
 
+    if(huart->Instance == USART1)
+    {
+        UART_OnByteReceived();
+    }
 
 }
 /* USER CODE END 4 */

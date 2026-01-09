@@ -137,12 +137,11 @@ bool TMC2208_GetMstepRegSelect(TMC2208_t *driver);
 bool TMC2208_GetMultistepFilt(TMC2208_t *driver);
 bool TMC2208_GetTestMode(TMC2208_t *driver);
 
-/* Read Functions */
+
 bool TMC2208_ReadIOIN(TMC2208_t *driver, TMC2208_IOIN_t *ioin);
 bool TMC2208_ReadIOIN_Raw(TMC2208_t *driver, uint32_t *value);
 bool TMC2208_UpdateIOIN(TMC2208_t *driver);
 
-/* Getter Functions */
 static inline bool TMC2208_GetENN(const TMC2208_IOIN_t *ioin) {
     return ioin->enn;
 }

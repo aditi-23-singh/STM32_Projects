@@ -37,7 +37,8 @@ void TMC_Init(TMC2208_t *driver, UART_HandleTypeDef *uart_handle, uint8_t slave_
 
 
 void TMC_WriteRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t data);
-
+bool TMC2208_SyncUART(TMC2208_t *driver);
+void UART_FlushRx(UART_HandleTypeDef *huart);
 bool TMC_ReadRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t *value);
 
 #endif // TMC2208_DRIVER_H

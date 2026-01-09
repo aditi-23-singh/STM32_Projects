@@ -1,7 +1,7 @@
 #include "Application.h"
 #include "ButtonHandler.h"
 #include "LEDApplication.h"
-#include "LCDApplication.h"
+
 #include "UART_Application.h"
 #include "LCD_Driver.h"
 #include "LED_Controller.h"

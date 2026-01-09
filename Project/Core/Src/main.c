@@ -46,9 +46,14 @@ uint32_t read_back_value = 0;
 uint32_t match_count = 0;
 uint32_t sent_value=0;
 extern UART_HandleTypeDef huart2;
+volatile bool tmc_rx_done = false;
 TMC2208_t motor1;
-
-
+uint32_t gconf_read_value = 0;
+uint32_t gconf_write_value = 0;
+bool read_success = false;
+bool write_success = false;
+bool debug=true;
+TMC2208_GCONF_t gconf;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -84,57 +89,53 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
+  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
+  ApplicationInit();
+  ButtonCore_Init(&userButton, Button_GPIO_Port, Button_Pin);
+  TMC_Init(&motor1,&huart2,0x00);
+  HAL_Delay(10);
+  TMC2208_InitGCONF(&motor1, &gconf);
 
   /* USER CODE END SysInit */
 
   /* USER CODE BEGIN 2 */;
+  if(debug)
+  	{
+
+  		  TMC2208_SyncUART(&motor1);
+  		  gconf_write_value = 0x00000001;
+  		  TMC_WriteRegister(&motor1, TMC2208_GCONF, gconf_write_value);
+  		  read_success = TMC_ReadRegister(&motor1, TMC2208_GCONF, &gconf_read_value);
+  	}
 
 
- // ApplicationInit();
- // ButtonCore_Init(&userButton, Button_GPIO_Port, Button_Pin);
 
-
-//
-//  TMC2208_WriteGCONF_Raw(&motor1, 0x00000000);
-
-//  TMC2208_ModifyGCONFBit(&motor1, TMC2208_GCONF_MULTISTEP_FILT_MASK, true);
-//  TMC2208_ModifyGCONFBit(&motor1, TMC2208_GCONF_EN_SPREADCYCLE_MASK , false);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-
-	  sent_value = 0x00061F0A;
-	 	              TMC_WriteRegister(&motor1, TMC2208_IHOLD_IRUN, sent_value);
-
-	 	             HAL_Delay(100);
 
 
-	 	              if (TMC_ReadRegister(&motor1, TMC2208_IHOLD_IRUN, &read_back_value)) {
+ while (1)
+ {
 
-	 	                  if (read_back_value == sent_value) {
-	 	                      match_count++;
-	 	                  }
-	 	              }
-	 	              HAL_Delay(50);
+	  ApplicationProcess();
+	  ButtonCore_Update(&userButton);
+	  LCDApplication_Process();
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 
 
-//*TODO*
-	  //ApplicationProcess();
-	  //ButtonCore_Update(&userButton);
-	  //LCDApplication_Process();
   }
   /* USER CODE END 3 */
 }
@@ -194,12 +195,8 @@ void HAL_SYSTICK_Callback(void)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    if(huart->Instance == USART1)
-    {
-        UART_OnByteReceived();
-    }
-
-
+	if (huart == motor1.uartHandle)
+		tmc_rx_done = true;
 
 
 }

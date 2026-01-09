@@ -5,8 +5,6 @@
 #include <stdbool.h>
 #include "TMC2208_Driver.h"
 
-
-
 #define TMC2208_GCONF_I_SCALE_ANALOG_BIT      0
 #define TMC2208_GCONF_INTERNAL_RSENSE_BIT     1
 #define TMC2208_GCONF_EN_SPREADCYCLE_BIT      2

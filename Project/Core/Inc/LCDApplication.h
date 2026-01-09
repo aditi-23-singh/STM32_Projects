@@ -18,7 +18,7 @@ typedef enum {
 
 
 void LCDApplication_Init(void);
-
+void LCDApplication_Process();
 void LCDApplication_UpdateLocalLED(LEDStatus_t status);
 void LCD_UpdateLocalMode(DisplayMode_t mode);
 void LCD_UpdateLocalLED(LEDStatus_t status);
@@ -31,7 +31,6 @@ void LCD_UpdateRemoteLED(LEDStatus_t status);
 void LCD_UpdateLocalStatus(uint8_t status);
 void LCD_UpdateRemoteStatus(uint8_t status);
 void LCD_UpdateStatusDisplay(void);
-void LCDApplication_Process(void);
 
 
 #endif

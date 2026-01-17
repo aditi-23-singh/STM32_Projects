@@ -54,6 +54,7 @@ bool read1_success = false;
 bool write1_success = false;
 bool debug=true;
 TMC2208_GCONF_t gconf;
+TMC2208_IOIN_t ioin;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -83,6 +84,8 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
 
+
+
 	HAL_Init();
 
   /* USER CODE BEGIN Init */
@@ -108,14 +111,13 @@ int main(void)
   if(debug)
   	{
 
-  		  TMC2208_SyncUART(&motor1);
-  		  gconf_write_value = 0x00000000;
-  		  TMC_WriteRegister(&motor1, TMC2208_GCONF, gconf_write_value);
-  		  read_success = TMC_ReadRegister(&motor1, TMC2208_GCONF, &gconf_read_value);
-  		  write1_success = TMC2208_ModifyGCONFBit(&motor1, TMC2208_GCONF_INTERNAL_RSENSE_MASK, true);
+//  		  TMC2208_SyncUART(&motor1);
+//  		  gconf_write_value = 0x00001001;
+//  		  TMC_WriteRegister(&motor1, TMC2208_GCONF, gconf_write_value);
+  		  read_success = TMC_ReadRegister(&motor1, TMC2208_IOIN, &gconf_read_value);
   		  HAL_Delay(10);
-  		  read1_success =  TMC2208_GetInternalRsense(&motor1);
-  		  HAL_Delay(10);
+  		  TMC2208_ReadIOIN(&motor1, &ioin);
+
 
   	}
 
@@ -130,6 +132,7 @@ int main(void)
  while (1)
  {
 
+//
 	  ApplicationProcess();
 	  ButtonCore_Update(&userButton);
 	  LCDApplication_Process();

@@ -1,15 +1,28 @@
 #include "TMC2208_Driver.h"
 #include <string.h>
+
 #define TMC_SYNC_BYTE  0x05
 #define TMC_READ_REQ_LEN 4
 #define TMC_WRITE_REQ_LEN 8
-#define TMC_REPLY_LEN 8
+#define TMC_REPLY_LEN 12
 
+// ✅ DEBUG VARIABLES FOR LIVE EXPRESSIONS
+uint8_t debug_tx_status = 0;
+uint8_t debug_rx_status = 0;
+uint8_t debug_reply_sync = 0;
+uint8_t debug_reply_addr = 0;
+uint8_t debug_reply_reg = 0;
+uint8_t debug_calc_crc = 0;
+uint8_t debug_recv_crc = 0;
+uint32_t debug_raw_value = 0;
+bool debug_crc_match = false;
+uint8_t debug_uart_state = 0;
 
-uint8_t crc1=0;
-uint8_t rxBuffer[12]={0};
-uint8_t txBuffer[8];
-static uint8_t calcCRC(uint8_t *datagram, uint8_t len) {
+uint8_t CRC1 = 0;
+uint8_t RxDummy[12] = {0};
+uint8_t TxBuffer[8];
+
+static uint8_t CalcCRC(uint8_t *datagram, uint8_t len) {
     uint8_t crc = 0;
     for (int i = 0; i < len; i++) {
         uint8_t currentByte = datagram[i];
@@ -21,100 +34,151 @@ static uint8_t calcCRC(uint8_t *datagram, uint8_t len) {
             }
             currentByte = currentByte >> 1;
         }
-        crc1=crc;
     }
     return crc;
 }
+
 void UART_FlushRx(UART_HandleTypeDef *huart)
 {
-   volatile uint32_t tmp;
-   while (__HAL_UART_GET_FLAG(huart, UART_FLAG_RXNE))
-   {
-       tmp = huart->Instance->RDR;
-       (void)tmp;
-   }
+    volatile uint32_t tmp;
+    while (__HAL_UART_GET_FLAG(huart, UART_FLAG_RXNE))
+    {
+        tmp = huart->Instance->RDR;
+        (void)tmp;
+    }
 }
-
-static void clearRXBuffer(TMC2208_t *driver, uint16_t bytesToClear) {
-
-    uint8_t dummy[12];
-    if(bytesToClear > 12) bytesToClear = 12;
-    HAL_UART_Receive(driver->uartHandle,  dummy,bytesToClear,10);
-
-}
-
-
 
 void TMC_Init(TMC2208_t *driver, UART_HandleTypeDef *uart_handle, uint8_t slave_addr) {
     driver->uartHandle = uart_handle;
     driver->slaveAddress = slave_addr;
     driver->isCRCError = false;
     driver->shadow_gconf = 0;
-       driver->shadow_ihold_irun = 0;
-       driver->shadow_ioin = 0;
+    driver->shadow_ihold_irun = 0;
+    driver->shadow_ioin = 0;
 }
 
 void TMC_WriteRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t data) {
+    TxBuffer[0] = TMC_SYNC_BYTE;
+    TxBuffer[1] = driver->slaveAddress;
+    TxBuffer[2] = reg_addr | 0x80;
+    TxBuffer[3] = (data >> 24) & 0xFF;
+    TxBuffer[4] = (data >> 16) & 0xFF;
+    TxBuffer[5] = (data >> 8) & 0xFF;
+    TxBuffer[6] = data & 0xFF;
+    TxBuffer[7] = CalcCRC(TxBuffer, 7);
 
+    UART_FlushRx(driver->uartHandle);
 
-    txBuffer[0] = TMC_SYNC_BYTE;
-    txBuffer[1] = driver->slaveAddress;
-    txBuffer[2] = reg_addr | 0x80;
-    txBuffer[3] = (data >> 24) & 0xFF;
-    txBuffer[4] = (data >> 16) & 0xFF;
-    txBuffer[5] = (data >> 8) & 0xFF;
-    txBuffer[6] = data & 0xFF;
-    txBuffer[7] = calcCRC(txBuffer, 7);
+    debug_tx_status = HAL_UART_Transmit(driver->uartHandle, TxBuffer, 8, 100);
 
-    HAL_UART_Transmit(driver->uartHandle, txBuffer, 8, 100);
-
-
-    clearRXBuffer(driver, 12);
+    uint8_t dummy[8];
+    debug_rx_status = HAL_UART_Receive(driver->uartHandle, dummy, 8, 50);
 }
+
 bool TMC2208_SyncUART(TMC2208_t *driver)
 {
     if (driver == NULL || driver->uartHandle == NULL)
         return false;
 
     uint32_t dummy;
+
     UART_FlushRx(driver->uartHandle);
+    HAL_Delay(10);
+
     TMC_ReadRegister(driver, TMC2208_GCONF, &dummy);
-    HAL_Delay(2);
+    HAL_Delay(10);
+
     UART_FlushRx(driver->uartHandle);
 
     return true;
 }
 
 bool TMC_ReadRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t *value) {
-    uint8_t txBuffer[8];
+    if (driver == NULL || value == NULL) {
+        return false;
+    }
 
+    uint8_t txBuffer[4];
+    uint8_t RxBuffer[12] = {0};
 
-    txBuffer[0] = 0x05;
+    // Build read request
+    txBuffer[0] = TMC_SYNC_BYTE;
     txBuffer[1] = driver->slaveAddress;
     txBuffer[2] = reg_addr;
-    txBuffer[3] = calcCRC(txBuffer, 3);
+    txBuffer[3] = CalcCRC(txBuffer, 3);
 
-    HAL_UART_AbortReceive_IT(driver->uartHandle);
-    __HAL_UART_CLEAR_FLAG(driver->uartHandle, UART_CLEAR_OREF);
+    // Flush RX
+    UART_FlushRx(driver->uartHandle);
+    __HAL_UART_FLUSH_DRREGISTER(driver->uartHandle);
 
-    if (HAL_UART_Receive_IT(driver->uartHandle, rxBuffer, 12) != HAL_OK) {
-          return false;
+    // ✅ Track UART state
+    debug_uart_state = driver->uartHandle->gState;
+
+    // Send request
+    HAL_StatusTypeDef tx_stat = HAL_UART_Transmit(driver->uartHandle, txBuffer, 4, 100);
+    debug_tx_status = tx_stat;  // 0=OK, 1=ERROR, 2=BUSY, 3=TIMEOUT
+
+    if (tx_stat != HAL_OK) {
+        return false;
     }
 
-	HAL_UART_Transmit(driver->uartHandle, txBuffer, 4, 100);
-    __HAL_UART_CLEAR_FLAG(driver->uartHandle, UART_CLEAR_OREF);
-    if (rxBuffer[4] != 0x05) {
+    // Wait for processing
+    HAL_Delay(2);
 
-            return false;
+    // Receive response (BLOCKING)
+    HAL_StatusTypeDef rx_stat = HAL_UART_Receive(driver->uartHandle, RxBuffer, 12, 100);
+    debug_rx_status = rx_stat;  // 0=OK, 3=TIMEOUT
+
+    if (rx_stat != HAL_OK) {
+        return false;
     }
-    uint8_t calculatedCRC = calcCRC(&rxBuffer[4],7);
-    if (calculatedCRC != rxBuffer[11]) {
+
+    // Copy to debug buffer
+    for (int i = 0; i < 12; i++) {
+        RxDummy[i] = RxBuffer[i];
+    }
+
+    // Parse reply (skip first 4 bytes = echo)
+    uint8_t *reply = &RxBuffer[4];
+
+    // ✅ Debug variables for reply parsing
+    debug_reply_sync = reply[0];  // Should be 0x05
+    debug_reply_addr = reply[1];  // Should be 0xFF
+    debug_reply_reg = reply[2];   // Should match reg_addr
+
+    // Verify sync byte
+    if (reply[0] != TMC_SYNC_BYTE) {
+        return false;
+    }
+
+    // Verify master address
+    if (reply[1] != 0xFF) {
+        return false;
+    }
+
+    // Verify register address
+    if (reply[2] != reg_addr) {
+        return false;
+    }
+
+    // Extract value
+    debug_raw_value = ((uint32_t)reply[3] << 24) |
+                      ((uint32_t)reply[4] << 16) |
+                      ((uint32_t)reply[5] << 8)  |
+                      ((uint32_t)reply[6]);
+
+    // Calculate and verify CRC
+    debug_calc_crc = CalcCRC(reply, 7);
+    debug_recv_crc = reply[7];
+    debug_crc_match = (debug_calc_crc == debug_recv_crc);
+
+    if (!debug_crc_match) {
         driver->isCRCError = true;
         return false;
     }
 
     driver->isCRCError = false;
-    *value = (rxBuffer[7] << 24) | (rxBuffer[8] << 16) | (rxBuffer[9] << 8) | rxBuffer[10];
+    *value = debug_raw_value;
 
     return true;
 }

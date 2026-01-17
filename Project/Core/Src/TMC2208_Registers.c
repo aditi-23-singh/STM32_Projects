@@ -1,6 +1,6 @@
 #include "TMC2208_Registers.h"
 
-static uint32_t buildGCONF(const TMC2208_GCONF_t *gconf) {
+static uint32_t BuildGCONF(const TMC2208_GCONF_t *gconf) {
     uint32_t value = 0;
     if (gconf->i_scale_analog)   value |= TMC2208_GCONF_I_SCALE_ANALOG_MASK;
     if (gconf->internal_rsense)  value |= TMC2208_GCONF_INTERNAL_RSENSE_MASK;
@@ -25,7 +25,7 @@ bool TMC2208_ReadGCONF(TMC2208_t *driver, TMC2208_GCONF_t *gconf) {
 
 void TMC2208_WriteGCONF(TMC2208_t *driver, const TMC2208_GCONF_t *gconf) {
     if (driver == NULL || gconf == NULL) return;
-    uint32_t value = buildGCONF(gconf);
+    uint32_t value = BuildGCONF(gconf);
     driver->shadow_gconf=value;
     TMC_WriteRegister(driver, TMC2208_GCONF, value);
 }
@@ -82,7 +82,7 @@ void TMC2208_InitGCONF(TMC2208_t *driver,TMC2208_GCONF_t *gconf) {
     gconf->mstep_reg_select = false;
     gconf->multistep_filt = true;
     gconf->test_mode = false;
-    gconf->raw_value = buildGCONF(gconf);
+    gconf->raw_value = BuildGCONF(gconf);
     driver->shadow_gconf=gconf->raw_value;
     TMC2208_WriteGCONF(driver, gconf);
 }
@@ -92,7 +92,7 @@ void TMC2208_InitGCONF_InternalRsense(TMC2208_t *driver,TMC2208_GCONF_t *gconf) 
 
     gconf->internal_rsense = true;
     gconf->i_scale_analog = true;
-   gconf->raw_value = buildGCONF(gconf);
+   gconf->raw_value = BuildGCONF(gconf);
     driver->shadow_gconf = gconf->raw_value;
     TMC2208_InitGCONF(driver,gconf);
 }
@@ -165,7 +165,7 @@ bool TMC2208_GetTestMode(TMC2208_t *driver) {
 }
 
 
-static void parseIOIN(uint32_t raw_value, TMC2208_IOIN_t *ioin) {
+static void ParseIOIN(uint32_t raw_value, TMC2208_IOIN_t *ioin) {
     ioin->raw_value = raw_value;
     ioin->enn           = (raw_value & TMC2208_IOIN_ENN_MASK) ? true : false;
     ioin->pdn_uart      = (raw_value & TMC2208_IOIN_PDN_UART_MASK) ? true : false;
@@ -186,18 +186,18 @@ bool TMC2208_ReadIOIN(TMC2208_t *driver, TMC2208_IOIN_t *ioin) {
     if (driver == NULL || ioin == NULL) return false;
     uint32_t raw_value = 0;
     if (!TMC_ReadRegister(driver, TMC2208_IOIN, &raw_value)) return false;
-    parseIOIN(raw_value, ioin);
+    ParseIOIN(raw_value, ioin);
     return true;
 }
 
- void parseIHOLD_IRUN(uint32_t raw_value, TMC2208_IHOLD_IRUN_t *ihold_irun) {
+ void ParseIHOLD_IRUN(uint32_t raw_value, TMC2208_IHOLD_IRUN_t *ihold_irun) {
     ihold_irun->raw_value = raw_value;
     ihold_irun->ihold = (uint8_t)((raw_value & TMC2208_IHOLD_MASK) >> TMC2208_IHOLD_SHIFT);
     ihold_irun->irun = (uint8_t)((raw_value & TMC2208_IRUN_MASK) >> TMC2208_IRUN_SHIFT);
     ihold_irun->iholddelay = (uint8_t)((raw_value & TMC2208_IHOLDDELAY_MASK) >> TMC2208_IHOLDDELAY_SHIFT);
 }
 
-static uint32_t buildIHOLD_IRUN(const TMC2208_IHOLD_IRUN_t *ihold_irun) {
+static uint32_t BuildIHOLD_IRUN(const TMC2208_IHOLD_IRUN_t *ihold_irun) {
     uint32_t value = 0;
     value |= ((uint32_t)(ihold_irun->ihold & 0x1F) << TMC2208_IHOLD_SHIFT);
     value |= ((uint32_t)(ihold_irun->irun & 0x1F) << TMC2208_IRUN_SHIFT);
@@ -209,7 +209,7 @@ bool TMC2208_ReadIHOLD_IRUN(TMC2208_t *driver, TMC2208_IHOLD_IRUN_t *ihold_irun)
     if (driver == NULL || ihold_irun == NULL) return false;
     uint32_t raw_value = 0;
     if (!TMC_ReadRegister(driver, TMC2208_IHOLD_IRUN, &raw_value)) return false;
-    parseIHOLD_IRUN(driver->shadow_ihold_irun, ihold_irun);
+    ParseIHOLD_IRUN(driver->shadow_ihold_irun, ihold_irun);
     return true;
 }
 
@@ -217,7 +217,7 @@ bool TMC2208_ReadIHOLD_IRUN(TMC2208_t *driver, TMC2208_IHOLD_IRUN_t *ihold_irun)
 
 void TMC2208_WriteIHOLD_IRUN(TMC2208_t *driver, const TMC2208_IHOLD_IRUN_t *ihold_irun) {
     if (driver == NULL || ihold_irun == NULL) return;
-    uint32_t value = buildIHOLD_IRUN(ihold_irun);
+    uint32_t value = BuildIHOLD_IRUN(ihold_irun);
     TMC_WriteRegister(driver, TMC2208_IHOLD_IRUN , value);
     driver->shadow_ihold_irun = value;
 }
@@ -234,7 +234,7 @@ void TMC2208_SetCurrent(TMC2208_t *driver, uint8_t irun, uint8_t ihold, uint8_t 
 void TMC2208_SetRunCurrent(TMC2208_t *driver, uint8_t irun) {
     if (driver == NULL) return;
     TMC2208_IHOLD_IRUN_t ihold_irun;
-    parseIHOLD_IRUN(driver->shadow_ihold_irun, &ihold_irun);
+    ParseIHOLD_IRUN(driver->shadow_ihold_irun, &ihold_irun);
     if (!TMC2208_ReadIHOLD_IRUN(driver, &ihold_irun)) return;
     ihold_irun.irun = irun & 0x1F;
     TMC2208_WriteIHOLD_IRUN(driver, &ihold_irun);
@@ -243,17 +243,17 @@ void TMC2208_SetRunCurrent(TMC2208_t *driver, uint8_t irun) {
 void TMC2208_SetHoldCurrent(TMC2208_t *driver, uint8_t ihold) {
     if (driver == NULL) return;
     TMC2208_IHOLD_IRUN_t ihold_irun;
-    parseIHOLD_IRUN(driver->shadow_ihold_irun, &ihold_irun);
+    ParseIHOLD_IRUN(driver->shadow_ihold_irun, &ihold_irun);
     if (!TMC2208_ReadIHOLD_IRUN(driver, &ihold_irun)) return;
     ihold_irun.ihold = ihold & 0x1F;
-    driver->shadow_ihold_irun = buildIHOLD_IRUN(&ihold_irun);
+    driver->shadow_ihold_irun = BuildIHOLD_IRUN(&ihold_irun);
     TMC2208_WriteIHOLD_IRUN(driver, &ihold_irun);
 }
 
 void TMC2208_SetHoldDelay(TMC2208_t *driver, uint8_t iholddelay) {
     if (driver == NULL) return;
     TMC2208_IHOLD_IRUN_t ihold_irun;
-    parseIHOLD_IRUN(driver->shadow_ihold_irun, &ihold_irun);
+    ParseIHOLD_IRUN(driver->shadow_ihold_irun, &ihold_irun);
     if (!TMC2208_ReadIHOLD_IRUN(driver, &ihold_irun)) return;
     ihold_irun.iholddelay = iholddelay & 0x0F;
     TMC2208_WriteIHOLD_IRUN(driver, &ihold_irun);
@@ -264,7 +264,7 @@ void TMC2208_InitIHOLD_IRUN(TMC2208_IHOLD_IRUN_t *ihold_irun, uint8_t irun, uint
     ihold_irun->irun = irun & 0x1F;
     ihold_irun->ihold = ihold & 0x1F;
     ihold_irun->iholddelay = iholddelay & 0x0F;
-    ihold_irun->raw_value = buildIHOLD_IRUN(ihold_irun);
+    ihold_irun->raw_value = BuildIHOLD_IRUN(ihold_irun);
 }
 uint8_t TMC2208_GetIHOLD(TMC2208_t *driver) {
     if (driver == NULL) return 0;

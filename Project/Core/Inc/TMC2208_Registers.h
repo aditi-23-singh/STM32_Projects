@@ -196,7 +196,7 @@ bool TMC2208_ReadIHOLD_IRUN(TMC2208_t *driver, TMC2208_IHOLD_IRUN_t *ihold_irun)
 bool TMC2208_ReadIHOLD_IRUN_Raw(TMC2208_t *driver, uint32_t *value);
 void TMC2208_WriteIHOLD_IRUN(TMC2208_t *driver, const TMC2208_IHOLD_IRUN_t *ihold_irun);
 void TMC2208_WriteIHOLD_IRUN_Raw(TMC2208_t *driver, uint32_t value);
-void parseIHOLD_IRUN(uint32_t raw_value, TMC2208_IHOLD_IRUN_t *ihold_irun);
+void ParseIHOLD_IRUN(uint32_t raw_value, TMC2208_IHOLD_IRUN_t *ihold_irun);
 void TMC2208_SetCurrent(TMC2208_t *driver, uint8_t irun, uint8_t ihold, uint8_t iholddelay);
 void TMC2208_SetRunCurrent(TMC2208_t *driver, uint8_t irun);
 void TMC2208_SetHoldCurrent(TMC2208_t *driver, uint8_t ihold);

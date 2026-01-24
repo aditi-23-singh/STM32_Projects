@@ -31,3 +31,11 @@ void UART_OnByteReceived(void)
 
     UART_Receive();
 }
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+    if(huart->Instance == USART1)
+    {
+
+        UART_Receive();
+    }
+}

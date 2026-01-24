@@ -42,19 +42,9 @@
 
 /* USER CODE BEGIN PV */
 Button_t userButton;
-extern UART_HandleTypeDef huart2;
-volatile bool tmc_rx_done = false;
+
 TMC2208_t motor1;
-uint32_t gconf_read_value = 0;
-uint32_t gconf_read_value1 = 0;
-uint32_t gconf_write_value = 0;
-bool read_success = false;
-bool write_success = false;
-bool read1_success = false;
-bool write1_success = false;
-bool debug=true;
-TMC2208_GCONF_t gconf;
-TMC2208_IOIN_t ioin;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -76,17 +66,14 @@ void SystemClock_Config(void);
 int main(void)
 {
 
-/* USER CODE BEGIN 1 */
+  /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-
-
-
-	HAL_Init();
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -101,25 +88,15 @@ int main(void)
   MX_USART2_UART_Init();
   ApplicationInit();
   ButtonCore_Init(&userButton, Button_GPIO_Port, Button_Pin);
-  TMC_Init(&motor1,&huart2,0x00);
-  HAL_Delay(10);
-  TMC2208_InitGCONF(&motor1, &gconf);
+
 
   /* USER CODE END SysInit */
 
-  /* USER CODE BEGIN 2 */;
-  if(debug)
-  	{
-
-//  		  TMC2208_SyncUART(&motor1);
-//  		  gconf_write_value = 0x00001001;
-//  		  TMC_WriteRegister(&motor1, TMC2208_GCONF, gconf_write_value);
-  		  read_success = TMC_ReadRegister(&motor1, TMC2208_IOIN, &gconf_read_value);
-  		  HAL_Delay(10);
-  		  TMC2208_ReadIOIN(&motor1, &ioin);
-
-
-  	}
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
+  /* USER CODE BEGIN 2 */
 
 
 
@@ -201,8 +178,7 @@ void HAL_SYSTICK_Callback(void)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if (huart == motor1.uartHandle)
-		tmc_rx_done = true;
+
 
     if(huart->Instance == USART1)
     {

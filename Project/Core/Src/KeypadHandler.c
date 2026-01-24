@@ -28,9 +28,6 @@ static EVENT_CODES_ENUM MapKeyToEvent(Keypad_Key_t key, Keypad_Event_t event_typ
             }
             break;
 
-
-        default:
-            break;
     }
 
     return EVT_NONE;
@@ -52,20 +49,20 @@ void UpdateKeypad(void)
     Keypad_Scan(&HardwareKeypad);
 
     Keypad_Key_t key;
-    Keypad_Event_t event_type = Keypad_GetEvent(&HardwareKeypad, &key);
+    Keypad_Event_t eventtype = Keypad_GetEvent(&HardwareKeypad, &key);
 
-    if (event_type == KEYPAD_EVENT_NONE) {
+    if (eventtype == KEYPAD_EVENT_NONE) {
         return;
     }
 
     KeypadData.CurrentKey = key;
     KeypadData.CurrentChar = Keypad_GetChar(key);
 
-    EVENT_CODES_ENUM app_event = MapKeyToEvent(key, event_type);
+    EVENT_CODES_ENUM appevent = MapKeyToEvent(key, eventtype);
 
-    if (app_event != EVT_NONE) {
+    if (appevent != EVT_NONE) {
         KeypadData.PreviousEvent = KeypadData.CurrentEvent;
-        KeypadData.CurrentEvent = app_event;
+        KeypadData.CurrentEvent = appevent;
         KeypadData.NewEventReceived = true;
     }
 }

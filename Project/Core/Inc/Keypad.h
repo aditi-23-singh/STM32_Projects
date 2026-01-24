@@ -5,11 +5,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-
 #define KEYPAD_ROWS 5
 #define KEYPAD_COLS 4
 #define KEYPAD_DEBOUNCE_MS 20
-#define KEYPAD_HOLD_TIME_MS 30
+#define KEYPAD_HOLD_TIME_MS 100
 
 #define ROW1_PIN GPIO_PIN_0
 #define ROW1_PORT GPIOC

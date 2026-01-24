@@ -29,7 +29,7 @@ void ApplicationInit()
 	LCD_Driver_Init();
 	UART_AppInit();
 	KeypadHandler_Init();
-	//MotorManager_Init();
+
 }
 
 void ApplicationProcess()
@@ -37,11 +37,10 @@ void ApplicationProcess()
 
 
 		LCDApplication_Process();
-//		MotorManager_Update();
+
 
 		if (UartData.NewEventReceived)
-	    {
-//			MotorManager_HandleEvent(UartData.CurrentEvent);
+		{
 	        SetRemoteMode(UartData.CurrentEvent);
 
 	        LCD_SyncRemoteEvent(UartData.CurrentEvent);
@@ -51,7 +50,7 @@ void ApplicationProcess()
 
 	    if (ButtonData.NewEventReceived)
 	    {
-//	    	MotorManager_HandleEvent(ButtonData.CurrentEvent);
+
 	        UART_SendEvent(ButtonData.CurrentEvent);
 	        SetLocalMode(ButtonData.CurrentEvent);
 
@@ -61,13 +60,12 @@ void ApplicationProcess()
 	    }
 	    if (KeypadData.NewEventReceived)
 	    	{
-	    		//MotorManager_HandleEvent(KeypadData.CurrentEvent);
+
 	    		UART_SendEvent(KeypadData.CurrentEvent);
 	    		SetLocalMode(KeypadData.CurrentEvent);
 	    		LCD_SyncLocalEvent(KeypadData.CurrentEvent);
 
-	    		// Optional: Display pressed key on LCD
-	    		// LCD_DisplayKeypadKey(KeypadData.CurrentChar);
+
 
 	    		KeypadData.NewEventReceived = false;
 	    	}

@@ -52,7 +52,7 @@ typedef enum {
     KEY_FACET,
     KEY_START,
     KEY_GRAIN
-} Keypad_Key_t;
+} KeypadKey_t;
 
 typedef enum {
     KEYPAD_EVENT_NONE = 0,
@@ -68,13 +68,13 @@ typedef struct {
     uint32_t debounce_timer;
     bool key_hold_triggered;
     Keypad_Event_t pending_event;
-    Keypad_Key_t pressed_key;
+    KeypadKey_t pressed_key;
 } Keypad_t;
 
 
 void Keypad_Init(Keypad_t *keypad);
 void Keypad_Scan(Keypad_t *keypad);
-Keypad_Event_t Keypad_GetEvent(Keypad_t *keypad, Keypad_Key_t *key);
-char Keypad_GetChar(Keypad_Key_t key);
-const char* Keypad_GetKeyName(Keypad_Key_t key);
+Keypad_Event_t Keypad_GetEvent(Keypad_t *keypad, KeypadKey_t *key);
+char Keypad_GetChar(KeypadKey_t key);
+const char* Keypad_GetKeyName(KeypadKey_t key);
 #endif

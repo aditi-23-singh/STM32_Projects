@@ -8,9 +8,9 @@ typedef struct {
     EVENT_CODES_ENUM CurrentEvent;
     EVENT_CODES_ENUM PreviousEvent;
     bool NewEventReceived;
-    Keypad_Key_t CurrentKey;
+    KeypadKey_t CurrentKey;
     char CurrentChar;
-} KeypadApplicationTypedefStruct;
+} KeyPadHandlerTypedefStruct;
 
 void KeypadHandler_Init(void);
 void UpdateKeypad(void);

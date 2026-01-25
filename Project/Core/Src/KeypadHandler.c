@@ -2,9 +2,9 @@
 #include "Keypad.h"
 
 Keypad_t HardwareKeypad;
-KeypadApplicationTypedefStruct KeypadData;
+KeyPadHandlerTypedefStruct KeypadData;
 
-static EVENT_CODES_ENUM MapKeyToEvent(Keypad_Key_t key, Keypad_Event_t event_type)
+static EVENT_CODES_ENUM MapKeyToEvent(KeypadKey_t key, Keypad_Event_t event_type)
 {
     switch (key) {
         case KEY_CLR:
@@ -48,7 +48,7 @@ void UpdateKeypad(void)
 {
     Keypad_Scan(&HardwareKeypad);
 
-    Keypad_Key_t key;
+    KeypadKey_t key;
     Keypad_Event_t eventtype = Keypad_GetEvent(&HardwareKeypad, &key);
 
     if (eventtype == KEYPAD_EVENT_NONE) {

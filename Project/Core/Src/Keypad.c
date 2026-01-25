@@ -1,7 +1,7 @@
 #include "Keypad.h"
 #include <string.h>
 
-static const Keypad_Key_t KeyMap[KEYPAD_ROWS][KEYPAD_COLS] = {
+static const KeypadKey_t KeyMap[KEYPAD_ROWS][KEYPAD_COLS] = {
 
 		    { KEY_NONE,   KEY_START,  KEY_NONE,  KEY_NONE },
 
@@ -22,21 +22,14 @@ static const struct {
     GPIO_TypeDef *port;
     uint16_t pin;
 } RowPins[KEYPAD_ROWS] = {
-    {ROW1_PORT, ROW1_PIN},
-    {ROW2_PORT, ROW2_PIN},
-    {ROW3_PORT, ROW3_PIN},
-    {ROW4_PORT, ROW4_PIN},
-	{ROW5_PORT, ROW5_PIN}
+    {ROW1_PORT, ROW1_PIN}, {ROW2_PORT, ROW2_PIN}, {ROW3_PORT, ROW3_PIN}, {ROW4_PORT, ROW4_PIN},	{ROW5_PORT, ROW5_PIN}
 };
 
 static const struct {
     GPIO_TypeDef *port;
     uint16_t pin;
 } ColumnPins[KEYPAD_COLS] = {
-    {COL1_PORT, COL1_PIN},
-    {COL2_PORT, COL2_PIN},
-    {COL3_PORT, COL3_PIN},
-    {COL4_PORT, COL4_PIN},
+    {COL1_PORT, COL1_PIN},    {COL2_PORT, COL2_PIN},    {COL3_PORT, COL3_PIN},    {COL4_PORT, COL4_PIN},
 
 };
 
@@ -68,20 +61,16 @@ static uint8_t Keypad_ReadColumns(void)
     return columnstate;
 }
 
-static Keypad_Key_t Keypad_ScanMatrix(void)
+static KeypadKey_t Keypad_ScanMatrix(void)
 {
-    Keypad_Key_t detectedkey = KEY_NONE;
+    KeypadKey_t detectedkey = KEY_NONE;
 
-    for (int row = 0; row < KEYPAD_ROWS; row++) {
-
+    for (int row = 0; row < KEYPAD_ROWS; row++)
+    {
         HAL_GPIO_WritePin(RowPins[row].port, RowPins[row].pin, GPIO_PIN_RESET);
-
         for (volatile int i = 0; i < 10; i++);
-
         uint8_t col_state = Keypad_ReadColumns();
-
         HAL_GPIO_WritePin(RowPins[row].port, RowPins[row].pin, GPIO_PIN_SET);
-
         if (col_state != 0) {
             for (int col = 0; col < KEYPAD_COLS; col++) {
                 if (col_state & (1 << col)) {
@@ -100,9 +89,10 @@ void Keypad_Scan(Keypad_t *keypad)
     if (keypad == NULL) return;
 
     uint32_t currenttime = HAL_GetTick();
-    Keypad_Key_t scannedkey = Keypad_ScanMatrix();
+    KeypadKey_t scannedkey = Keypad_ScanMatrix();
 
-    if (scannedkey != keypad->current_key) {
+    if (scannedkey != keypad->current_key)
+    {
         keypad->debounce_timer++;
 
         if (keypad->debounce_timer >= KEYPAD_DEBOUNCE_MS) {
@@ -125,7 +115,8 @@ void Keypad_Scan(Keypad_t *keypad)
                 keypad->key_hold_triggered = false;
             }
         }
-    } else {
+    } else
+    {
         keypad->debounce_timer = 0;
     }
 
@@ -138,7 +129,7 @@ void Keypad_Scan(Keypad_t *keypad)
         }
     }
 }
-Keypad_Event_t Keypad_GetEvent(Keypad_t *keypad, Keypad_Key_t *key)
+Keypad_Event_t Keypad_GetEvent(Keypad_t *keypad, KeypadKey_t *key)
 {
     if (keypad == NULL) return KEYPAD_EVENT_NONE;
 
@@ -153,7 +144,7 @@ Keypad_Event_t Keypad_GetEvent(Keypad_t *keypad, Keypad_Key_t *key)
     return event;
 }
 
-char Keypad_GetChar(Keypad_Key_t key)
+char Keypad_GetChar(KeypadKey_t key)
 {
     if (key >= 0 && key < sizeof(KeyNames)/sizeof(KeyNames[0])) {
         return KeyNames[key][0];
@@ -161,7 +152,7 @@ char Keypad_GetChar(Keypad_Key_t key)
     return '\0';
 }
 
-const char* Keypad_GetKeyName(Keypad_Key_t key)
+const char* Keypad_GetKeyName(KeypadKey_t key)
 {
     if (key >= 0 && key < sizeof(KeyNames)/sizeof(KeyNames[0])) {
         return KeyNames[key];

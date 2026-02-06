@@ -9,6 +9,7 @@ extern MotorController_t MotorControl;
 #define STEPS_PER_MOVE 200
 #define PERIOD_MEDIUM_US 2000
 #define PERIOD_SLOW_US 5000
+#define PERIOD_FAST_US 1000
 
 void MotorApplication_Init(void) {
 
@@ -38,13 +39,38 @@ void MotorApplication_SetMotorMode(EVENT_CODES_ENUM event) {
         	MotorControl.running = 1;
             break;
 
+        case EVT_FACET_CW:
+                   MotorControl.direction = 1;
+                   MotorControl.period_us = PERIOD_FAST_US;
+                   MotorControl.steps_remaining = 0;
+                   MotorControl.running = 1;
+                   break;
+
+        case EVT_FACET_CCW:
+                   MotorControl.direction = -1;
+                   MotorControl.period_us = PERIOD_FAST_US;
+                   MotorControl.steps_remaining = 0;
+                   MotorControl.running = 1;
+                   break;
+        case EVT_GRAIN_CW:
+                  MotorControl.direction = 1;
+                  MotorControl.period_us = PERIOD_FAST_US;
+                  MotorControl.steps_remaining = 0;
+                  MotorControl.running = 1;
+                  break;
+
+         case EVT_GRAIN_CCW:
+                  MotorControl.direction = -1;
+                  MotorControl.period_us = PERIOD_FAST_US;
+                  MotorControl.steps_remaining = 0;
+                  MotorControl.running = 1;
+                  break;
+
         case EVT_HOLD_END:
         	MotorControl.running = 0;
         	MotorControl.accumulator_us = 0;
             break;
 
-        default:
-            break;
     }
 
 }

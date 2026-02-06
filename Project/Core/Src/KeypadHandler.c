@@ -28,6 +28,43 @@ static EVENT_CODES_ENUM MapKeyToEvent(KeypadKey_t key, Keypad_Event_t event_type
             }
             break;
 
+        case KEY_FACET_LEFT:
+                    if (event_type == KEYPAD_EVENT_KEY_PRESSED) {
+                        return EVT_FACET_CW;  // Left button = Clockwise
+                    }
+                    else if (event_type == KEYPAD_EVENT_KEY_RELEASED) {
+                        return EVT_HOLD_END;  // Stop when released
+                    }
+                    break;
+
+                case KEY_FACET_RIGHT:
+                    if (event_type == KEYPAD_EVENT_KEY_PRESSED) {
+                        return EVT_FACET_CCW;  // Right button = Counter-clockwise
+                    }
+                    else if (event_type == KEYPAD_EVENT_KEY_RELEASED) {
+                        return EVT_HOLD_END;  // Stop when released
+                    }
+                    break;
+
+                case KEY_GRAIN_LEFT:
+                        if (event_type == KEYPAD_EVENT_KEY_PRESSED) {
+                            return EVT_GRAIN_CW;  // Left button = Clockwise
+                        }
+                        else if (event_type == KEYPAD_EVENT_KEY_RELEASED) {
+                            return EVT_HOLD_END;  // Stop when released
+                        }
+                        break;
+
+                    case KEY_GRAIN_RIGHT:
+                        if (event_type == KEYPAD_EVENT_KEY_PRESSED) {
+                            return EVT_GRAIN_CCW;  // Right button = Counter-clockwise
+                        }
+                        else if (event_type == KEYPAD_EVENT_KEY_RELEASED) {
+                            return EVT_HOLD_END;  // Stop when released
+                        }
+                        break;
+
+
     }
 
     return EVT_NONE;

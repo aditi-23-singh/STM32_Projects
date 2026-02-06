@@ -3,19 +3,17 @@
 
 static const KeypadKey_t KeyMap[KEYPAD_ROWS][KEYPAD_COLS] = {
 
-		    { KEY_NONE,   KEY_START,  KEY_NONE,  KEY_NONE },
-
-		    { KEY_NONE,   KEY_NONE,  KEY_NONE,  KEY_NONE },
-
-		    { KEY_NONE,   KEY_CLR,  KEY_NONE,   KEY_NONE },
-
-		    { KEY_NONE,   KEY_ENT,  KEY_NONE,   KEY_NONE },
-
-		    { KEY_NONE,   KEY_NONE,  KEY_NONE,  KEY_NONE }
+		 { KEY_FACET_LEFT,  KEY_START,       KEY_FACET_RIGHT, KEY_NONE },
+		    { KEY_NONE,        KEY_NONE,        KEY_NONE,        KEY_NONE },
+		    { KEY_GRAIN_LEFT,  KEY_CLR,         KEY_GRAIN_RIGHT, KEY_NONE },
+		    { KEY_NONE,        KEY_ENT,         KEY_NONE,        KEY_NONE },
+		    { KEY_NONE,        KEY_NONE,        KEY_NONE,        KEY_NONE }
 };
 
 static const char* KeyNames[] = {
-    "NONE",   "F1",  "F2", "CLR", "+",  "ENT", "UP",  "LEFT",  "RIGHT",  "ZEUT",   "DN", "-",  "WASS", "AUTO", "LIFT","FACET","START","GRAIN"
+		"NONE",   "F1",  "F2", "CLR", "+",  "ENT", "UP",  "LEFT",  "RIGHT",
+		    "ZEUT",   "DN", "-",  "WASS", "AUTO", "LIFT","FACET","START","GRAIN",
+		    "FACET_LEFT", "FACET_RIGHT", "GRAIN_LEFT", "GRAIN_RIGHT"
 };
 
 static const struct {

@@ -6,7 +6,6 @@
 #define TMC_WRITE_REQ_LEN 8
 #define TMC_REPLY_LEN 12
 
-// ✅ DEBUG VARIABLES FOR LIVE EXPRESSIONS
 uint8_t debug_tx_status = 0;
 uint8_t debug_rx_status = 0;
 uint8_t debug_reply_sync = 0;
@@ -101,73 +100,68 @@ bool TMC_ReadRegister(TMC2208_t *driver, uint8_t reg_addr, uint32_t *value) {
     uint8_t txBuffer[4];
     uint8_t RxBuffer[12] = {0};
 
-    // Build read request
+
     txBuffer[0] = TMC_SYNC_BYTE;
     txBuffer[1] = driver->slaveAddress;
     txBuffer[2] = reg_addr;
     txBuffer[3] = CalcCRC(txBuffer, 3);
 
-    // Flush RX
     UART_FlushRx(driver->uartHandle);
     __HAL_UART_FLUSH_DRREGISTER(driver->uartHandle);
 
-    // ✅ Track UART state
+
     debug_uart_state = driver->uartHandle->gState;
 
-    // Send request
     HAL_StatusTypeDef tx_stat = HAL_UART_Transmit(driver->uartHandle, txBuffer, 4, 100);
-    debug_tx_status = tx_stat;  // 0=OK, 1=ERROR, 2=BUSY, 3=TIMEOUT
+    debug_tx_status = tx_stat;
 
     if (tx_stat != HAL_OK) {
         return false;
     }
 
-    // Wait for processing
     HAL_Delay(2);
 
-    // Receive response (BLOCKING)
     HAL_StatusTypeDef rx_stat = HAL_UART_Receive(driver->uartHandle, RxBuffer, 12, 100);
-    debug_rx_status = rx_stat;  // 0=OK, 3=TIMEOUT
+    debug_rx_status = rx_stat;
 
     if (rx_stat != HAL_OK) {
         return false;
     }
 
-    // Copy to debug buffer
+
     for (int i = 0; i < 12; i++) {
         RxDummy[i] = RxBuffer[i];
     }
 
-    // Parse reply (skip first 4 bytes = echo)
     uint8_t *reply = &RxBuffer[4];
 
-    // ✅ Debug variables for reply parsing
-    debug_reply_sync = reply[0];  // Should be 0x05
-    debug_reply_addr = reply[1];  // Should be 0xFF
-    debug_reply_reg = reply[2];   // Should match reg_addr
 
-    // Verify sync byte
+    debug_reply_sync = reply[0];
+    debug_reply_addr = reply[1];
+    debug_reply_reg = reply[2];
+
+
     if (reply[0] != TMC_SYNC_BYTE) {
         return false;
     }
 
-    // Verify master address
+
     if (reply[1] != 0xFF) {
         return false;
     }
 
-    // Verify register address
+
     if (reply[2] != reg_addr) {
         return false;
     }
 
-    // Extract value
+
     debug_raw_value = ((uint32_t)reply[3] << 24) |
                       ((uint32_t)reply[4] << 16) |
                       ((uint32_t)reply[5] << 8)  |
                       ((uint32_t)reply[6]);
 
-    // Calculate and verify CRC
+
     debug_calc_crc = CalcCRC(reply, 7);
     debug_recv_crc = reply[7];
     debug_crc_match = (debug_calc_crc == debug_recv_crc);

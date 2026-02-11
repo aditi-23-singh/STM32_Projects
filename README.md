@@ -1,4 +1,4 @@
-### Distributed Dual-Node Stepper Motor Control System
+## Distributed Dual-Node Stepper Motor Control System
 Bi-Directional UART Communication | Dual STM32 | TMC2208 | Event-Driven Firmware
 
 ## Project Summary

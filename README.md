@@ -1,148 +1,190 @@
-# **# STM32 Projects**
+🚀 Distributed Dual-Node Stepper Motor Control System
+Bi-Directional UART Communication | Dual STM32 | TMC2208 | Event-Driven Firmware
+📌 Project Summary
 
+Designed and implemented a distributed embedded control architecture using two STM32F051 microcontrollers communicating over bi-directional UART, where both nodes are capable of controlling the same stepper motor through a TMC2208 driver.
 
+The system supports:
 
-This repository contains STM32 embedded projects demonstrating **single click, double click, and long-press (hold)** button handling to control LED behavior using **STM32 HAL.**
+Motor control from either board
 
+Real-time command arbitration
 
+Single click → Start/Stop
 
-The projects are implemented using **polling-based logic with `HAL\_GetTick()`**, without blocking delays, making them suitable for real-time embedded applications.
+Double click → Reverse direction
 
+Long press → Mode control
 
+Deterministic timer-based pulse generation
 
+LED-assisted hardware debugging
 
+This project demonstrates distributed embedded design, peripheral-level control, communication protocol handling, and real-time event synchronization.
 
-### **## Repository Structure**
+🧠 System Architecture
+Both STM32 boards:
 
+Scan user inputs
 
+Generate control commands
 
-Projects/
+Transmit and receive via UART
 
-├── click1/
+Update motor state based on synchronized command logic
 
-│ └── main.c
+Motor control authority is dynamically managed through command synchronization.
 
-├── hold1/
+⚙️ Core Engineering Components
+1️⃣ Bi-Directional UART Communication
 
-│ └── main.c
+Full-duplex UART configuration
 
-└── README.md
+Interrupt-driven RX handling
 
-### 
+Lightweight command protocol
 
-### **## Hardware Requirements**
+Conflict handling logic
 
+Command acknowledgment strategy
 
+Key focus areas:
 
-**-** STM32 development board (e.g., STM32F0/F1 series)
+Clock accuracy & baud rate matching
 
-\- User Button connected to **PA0**
+Framing reliability
 
-\- LED connected to **PC8 / PC13** (depending on board)
+Data integrity verification
 
-\- STM32CubeIDE
+Real-time synchronization
 
+This demonstrates understanding of multi-node embedded systems and communication integrity.
 
+2️⃣ Event-Based Input Engine
 
-**---**
+Implemented a structured FSM to detect:
 
+Single click
 
+Double click (timing window based)
 
-## **## Project 1: `click1` — Button Click Control**
+Long press
 
+Double click triggers direction reversal.
 
+Key techniques:
 
-#### **### Features**
+Edge detection
 
-**- Single Click**
+Non-blocking timing logic
 
-&nbsp; - Cycles through predefined LED blink delays
+Debounce filtering
 
-\- **Double Click**
+Deterministic state transitions
 
-&nbsp; - Reverses the blink direction (forward / backward)
+This reflects correct event-driven firmware design rather than delay-based logic.
 
-\- Non-blocking implementation using `HAL\_GetTick()`
+3️⃣ Deterministic Motor Control (TMC2208 – STEP/DIR Mode)
 
+Hardware timer-based pulse generation
 
+Adjustable step frequency
 
-#### **### LED Behavior**
+Direction toggling without step loss
 
-| Action 	| Result |
+Safe enable/disable sequencing
 
-|------		|-------|
+Synchronization with UART events
 
-| Single Click 	| Move to next blink delay |
+Ensured:
 
-| Double Click 	| Reverse delay sequence direction |
+No missed steps during direction changes
 
-#### 
+No blocking delays
 
-#### **### Delay Values**
+Pulse width constraints respected
 
+Stable motor operation under distributed command input
 
+4️⃣ Distributed Control Handling
 
-{ 250 ms, 500 ms, 1000 ms, 2000 ms }
+Since both boards can issue motor commands:
 
+Implemented command synchronization logic
 
+Prevented inconsistent motor states
 
+Ensured deterministic behavior under concurrent inputs
 
+This models real-world distributed embedded systems where multiple controllers share authority.
 
-## **## Project 2: hold1 — Button Click + Long Press Control**
 
+5️⃣ Structured Hardware Debugging
 
+Used LED signaling as a deterministic debug interface:
 
-#### **#### Features**
+UART transmit/receive confirmation
 
+State machine transitions
 
+Direction change verification
 
-* Single Click->Change LED blink speed
-* Double Click->Reverse blinking direction
-* Long Press (Hold)->LED blinks at half the current delay
-* Normal blinking is suspended during hold
-* Clean separation of normal mode and hold mode
-* Hold Logic->Hold detected after 100 ms
-* Delay values are halved dynamically
-* Original delays restored on button release
+Error detection states
 
+Also performed:
 
+Register-level inspection
 
-#### **### Software Design Highlights**
+Timer debugging
 
+Peripheral clock validation
 
+Step signal probing
 
-* Uses HAL\_GPIO\_TogglePin() for efficient blinking
-* Uses unsigned time comparison to handle SysTick overflow safely
-* Prevents multiple timing sources from controlling the LED simultaneously
-* Suitable for extension to:
-* Interrupt-based button handling
-* Finite State Machine (FSM)
-* RTOS-based systems
+Demonstrates disciplined debugging methodology.
 
+🧪 Engineering Challenges Solved
 
+Reliable double-click detection under timing constraints
 
-#### **### Future Improvements**
+UART synchronization between two MCUs
 
+Preventing step loss during direction reversal
 
+Avoiding race conditions in distributed control
 
-* Debouncing using timer-based filtering
-* EXTI interrupt-based button handling
-* LED control using HAL\_GPIO\_WritePin() with state machine
-* Code reuse using common button driver module
+Maintaining deterministic pulse generation
 
+🎯 What This Project Demonstrates
 
+This project reflects:
 
-#### 
+Multi-controller embedded system design
 
-#### **###Author**
+Real-time event-driven firmware
 
+Deterministic motor control
 
+Communication protocol implementation
 
-**Aditi Singh**
+Structured debugging methodology
 
-**B.Tech, Electronics and Communication Engineering**
+Hardware-level reasoning under timing constraints
 
-**NIT Sikkim**
+It models a scaled-down version of distributed hardware control systems used in industrial and silicon enablement environments.
 
-**Interests: Embedded Systems, VLSI, Firmware Development**
+Maintaining deterministic pulse generation
 
+🔬 Potential Extensions
+
+DMA-based UART communication
+
+Acceleration ramp (trapezoidal velocity profile)
+
+Arbitration protocol with priority logic
+
+RTOS-based task scheduling
+
+Closed-loop feedback with encoder
+
+CRC-based command validation
